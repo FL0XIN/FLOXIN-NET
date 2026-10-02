@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+title: "FLOXIN NET"
+message: "If FLOXIN NET helps your work, please cite this repository."
+type: software
+repository-code: "https://github.com/FL0XIN/FLOXIN-NET"
+license: MIT
+abstract: "Cross-platform local DNS ad blocking, network diagnostics, and measurement-based optimization tools."
+authors:
+  - family-names: "FL0XIN"
+    given-names: "FLOXIN NET Team"

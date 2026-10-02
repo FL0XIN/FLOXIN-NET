@@ -1,6 +1,6 @@
 # NETTURBO
 
-NETTURBO measures alternate HTTPS ports on a configurable CDN endpoint and recommends the fastest stable port. It uses three repeated downloads per port by default and stores measurements in SQLite.
+NETTURBO measures alternate HTTPS ports against one fixed comparison source, Cloudflare Speed (`speed.cloudflare.com/__down`), and recommends the fastest stable port. It uses three repeated downloads per port by default and stores measurements in SQLite. Keeping the CDN and payload constant makes port comparisons repeatable.
 
 ## Commands
 
@@ -16,7 +16,7 @@ NETTURBO history --hours 24
 NETTURBO report
 ```
 
-The default test endpoint is `speed.cloudflare.com`, the payload is 500 KB, and the tested ports are `443, 8443, 2053, 2083, 2087, 2096, 8080, 8880`. Override the endpoint or payload with `FLOXIN_NETTURBO_HOST` and `FLOXIN_NETTURBO_BYTES`.
+The fixed default endpoint is `https://speed.cloudflare.com:<port>/__down?bytes=500000`, the payload is 500 KB, and the tested ports are `443, 8443, 2053, 2083, 2087, 2096, 8080, 8880`. For controlled diagnostics only, `FLOXIN_NETTURBO_HOST` and `FLOXIN_NETTURBO_BYTES` may override the source and payload; normal runs use the fixed default.
 
 ## Storage
 

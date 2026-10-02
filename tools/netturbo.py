@@ -6,7 +6,11 @@ from pathlib import Path
 PORTS=(443,8443,2053,2083,2087,2096,8080,8880)
 BASE=Path(os.environ.get("FLOXIN_NETTURBO_DIR", Path.home()/".floxin_netturbo")); BASE.mkdir(parents=True,exist_ok=True)
 CONFIG=BASE/"config.json"; DB=BASE/"history.db"; LOG=BASE/"log.txt"; ENV=BASE/"environment.sh"; PID=BASE/"monitor.pid"
-HOST=os.environ.get("FLOXIN_NETTURBO_HOST","speed.cloudflare.com")
+# All normal measurements use the same public CDN and download path so results are comparable.
+# The environment override is retained only for explicit local diagnostics.
+DEFAULT_CDN_HOST="speed.cloudflare.com"
+HOST=os.environ.get("FLOXIN_NETTURBO_HOST",DEFAULT_CDN_HOST)
+CDN_PATH="/__down"
 BYTES=int(os.environ.get("FLOXIN_NETTURBO_BYTES","500000"))
 
 def config():
@@ -18,7 +22,7 @@ def db():
 def log(msg):
     with LOG.open("a") as f:f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} {msg}\n")
 def run_curl(port):
-    url=f"https://{HOST}:{port}/__down?bytes={BYTES}"
+    url=f"https://{HOST}:{port}{CDN_PATH}?bytes={BYTES}"
     start=time.perf_counter()
     cmd=["curl","-L","-sS","--fail","--connect-timeout","3","--max-time","12","-o","/dev/null","-w","%{speed_download}",url]
     try:
@@ -43,10 +47,10 @@ def winner(results):
 def emit(obj): print(json.dumps(obj,indent=2,ensure_ascii=False))
 def scan_cmd(args):
     results=asyncio.run(scan(tries=args.tries)); record(results); w=winner(results); log(f"scan winner={w['port'] if w else 'none'}")
-    emit({"host":HOST,"bytes":BYTES,"tries":args.tries,"ports":results,"winner":w})
+    emit({"cdn":{"host":HOST,"path":CDN_PATH,"bytes":BYTES,"fixed_default":HOST==DEFAULT_CDN_HOST},"tries":args.tries,"ports":results,"winner":w})
 def best_cmd(_):
     c=db(); row=c.execute("SELECT port,AVG(speed_bps) speed,AVG(latency_ms) latency,AVG(ok)*100 stability FROM samples WHERE ts>? GROUP BY port ORDER BY speed DESC LIMIT 1",(time.time()-3600,)).fetchone(); c.close()
-    emit({"host":HOST,"best":({"port":row[0],"speed_bps":round(row[1],2),"latency_ms":round(row[2],2) if row[2] else None,"stability":round(row[3],1)} if row else None)})
+    emit({"cdn":{"host":HOST,"path":CDN_PATH,"fixed_default":HOST==DEFAULT_CDN_HOST},"best":({"port":row[0],"speed_bps":round(row[1],2),"latency_ms":round(row[2],2) if row[2] else None,"stability":round(row[3],1)} if row else None)})
 def apply_cmd(args):
     if args.port not in PORTS: raise SystemExit(f"unsupported port; choose one of {','.join(map(str,PORTS))}")
     result=apply_port(args.port)
@@ -71,7 +75,7 @@ def history(args):
     c=db(); rows=c.execute("SELECT datetime(ts,'unixepoch','localtime'),port,ROUND(speed_bps,2),ROUND(latency_ms,2),ok FROM samples WHERE ts>? ORDER BY ts DESC LIMIT 500",(time.time()-args.hours*3600,)).fetchall(); c.close(); emit({"hours":args.hours,"rows":[{"time":r[0],"port":r[1],"speed_bps":r[2],"latency_ms":r[3],"ok":bool(r[4])} for r in rows]})
 def report(_):
     c=db(); rows=c.execute("SELECT port,AVG(speed_bps),AVG(latency_ms),AVG(ok)*100,COUNT(*) FROM samples GROUP BY port ORDER BY AVG(speed_bps) DESC").fetchall(); c.close(); best=rows[0][1] if rows else 0
-    emit({"host":HOST,"ports":[{"port":r[0],"avg_speed_bps":round(r[1],2),"avg_latency_ms":round(r[2],2) if r[2] else None,"stability":round(r[3],1),"samples":r[4],"relative_to_best_percent":round(r[1]/best*100,1) if best else None} for r in rows],"estimated_gain":"Measurement only; savings depend on the application and network policy.","recommendation":"Apply only after reviewing repeated measurements."})
+    emit({"cdn":{"host":HOST,"path":CDN_PATH,"fixed_default":HOST==DEFAULT_CDN_HOST},"ports":[{"port":r[0],"avg_speed_bps":round(r[1],2),"avg_latency_ms":round(r[2],2) if r[2] else None,"stability":round(r[3],1),"samples":r[4],"relative_to_best_percent":round(r[1]/best*100,1) if best else None} for r in rows],"estimated_gain":"Measurement only; savings depend on the application and network policy.","recommendation":"Apply only after reviewing repeated measurements."})
 def auto_cmd(_):
     if PID.exists():
         try:
@@ -91,7 +95,7 @@ def monitor(args):
         if args.once: break
         time.sleep(args.interval)
 def main():
-    p=argparse.ArgumentParser(prog="NETTURBO",description="Measure alternate CDN ports and recommend a faster client endpoint")
+    p=argparse.ArgumentParser(prog="NETTURBO",description=f"Measure alternate HTTPS ports on fixed CDN {DEFAULT_CDN_HOST}{CDN_PATH}")
     s=p.add_subparsers(dest="cmd",required=True)
     q=s.add_parser("scan",help="test all eight ports with repeated downloads"); q.add_argument("--tries",type=int,default=3); q.set_defaults(fn=scan_cmd)
     s.add_parser("best",help="show the best recent port").set_defaults(fn=best_cmd)

@@ -971,6 +971,38 @@ cmd_help() {
     echo -e "  ${CG}reload${CZ}          Reload codes/scenarios files"
     echo ""
 
+    echo -e "${CC}═══════ NETWORK ANALYSIS ═══════${CZ}"
+    echo -e "  ${CG}netscan network${CZ}       Interface and reachability snapshot"
+    echo -e "  ${CG}netscan quality${CZ}       Latency, jitter, and quality score"
+    echo -e "  ${CG}netscan latency${CZ}       Measure target latency"
+    echo -e "  ${CG}netscan jitter${CZ}        Measure timing variation"
+    echo -e "  ${CG}netscan packet-loss${CZ}   Measure packet loss"
+    echo -e "  ${CG}netscan dpi-probe${CZ}     Behavior probe (measurement only)"
+    echo -e "  ${CG}netscan qos-detect${CZ}    QoS behavior probe"
+    echo -e "  ${CG}netopt auto${CZ}           Full recommendations"
+    echo -e "  ${CG}netopt mtu-probe${CZ}      Detect MTU recommendation"
+    echo -e "  ${CG}netopt mtu-set${CZ}       Apply an explicit MTU value"
+    echo -e "  ${CG}netopt tcp-tuning${CZ}    Show TCP recommendations"
+    echo -e "  ${CG}netopt port-test${CZ}     Compare selected ports"
+    echo -e "  ${CG}netopt route-test${CZ}    Compare route targets"
+    echo -e "  ${CG}netopt dns-optimize${CZ}  Compare DNS response time"
+    echo -e "  ${CG}netopt protocol${CZ}      Compare TCP/UDP behavior"
+    echo -e "  ${CG}netopt status|reset${CZ}  View or clear local recommendations"
+    echo ""
+
+    echo -e "${CC}═══════ NETTURBO ═══════${CZ}"
+    echo -e "  ${CG}netturbo scan${CZ}        Test all 8 HTTPS ports"
+    echo -e "  ${CG}netturbo best${CZ}        Show fastest recent port"
+    echo -e "  ${CG}netturbo apply --port P${CZ} Save a client port proposal"
+    echo -e "  ${CG}netturbo monitor${CZ}     Run repeated measurements"
+    echo -e "  ${CG}netturbo auto${CZ}        Start 5-minute background monitor"
+    echo -e "  ${CG}netturbo status${CZ}      Show selected port and state"
+    echo -e "  ${CG}netturbo stop${CZ}        Stop background monitor"
+    echo -e "  ${CG}netturbo history${CZ}     Show stored measurements"
+    echo -e "  ${CG}netturbo report${CZ}      Show aggregate comparison"
+    echo -e "  ${CY}CDN: speed.cloudflare.com/__down (fixed comparison source)${CZ}"
+    echo ""
+
     # Mode-specific quick tips
     case "$MODE" in
         BOOSTER)
@@ -1298,5 +1330,5 @@ case "${1:-shell}" in
     doctor|fix)       cmd_doctor ;;
     env|info)         cmd_env ;;
     help|-h)          cmd_help ;;
-    *)                echo "Usage: FLOXIN [shell|start|restart|rescue|status|stop|export|help]" ;;
+    *)                echo "Usage: FLOXIN [shell|start|restart|rescue|status|stop|export|netscan|netopt|netturbo|help]" ;;
 esac
