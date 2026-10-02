@@ -17,7 +17,7 @@ The safe default is `127.0.0.1:5353`, which requires no root. Advanced users may
 ## Install the existing version
 
 ```bash
-git clone https://github.com/WORM/floxin-net.git
+git clone https://github.com/FL0XIN/FLOXIN-NET.git
 cd floxin-net
 ./setup.sh
 ```

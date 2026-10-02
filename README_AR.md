@@ -17,7 +17,7 @@
 ## التثبيت
 
 ```bash
-git clone https://github.com/WORM/floxin-net.git
+git clone https://github.com/FL0XIN/FLOXIN-NET.git
 cd floxin-net
 ./setup.sh
 ```
