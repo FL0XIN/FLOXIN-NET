@@ -10,7 +10,7 @@ echo -e "${CC}  TESTALL - Full System Check${CZ}"
 echo -e "${CC}  $(date '+%Y-%m-%d %H:%M')${CZ}"
 echo -e "${CC}=========================================${CZ}"
 sec "Scripts"
-for s in FLOXIN DNSF CHECK DNSWITCH WEHACK SAFE_MODE THROTTLE_SIM TESTALL SOUSG NETSTATE PANIC; do
+for s in FLOXIN FLOXIN_API DNSF CHECK DNSWITCH WEHACK SAFE_MODE THROTTLE_SIM TESTALL SOUSG NETSTATE PANIC; do
     [ -x "$HOME/bin/$s" ] && ok "$s" || warn "$s missing"
 done
 sec "DNS Server"

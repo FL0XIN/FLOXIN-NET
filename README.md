@@ -28,6 +28,8 @@ Use `./install.sh --no-install` when system packages are already present and no 
 
 `FLOXIN` launches the interactive shell. `FLOXIN bg` starts the DNS service, `FLOXIN doctor` diagnoses and repairs dependencies, `FLOXIN env` displays system information, `FLOXIN export` creates a backup, and `FLOXIN DV` opens emergency mode. `DNSF start|stop|restart|status|test` manages the resolver. `TESTALL` runs the smoke checks. Existing quick commands such as `FAST`, `SAVE`, `HIDE`, `VPN`, and `ALL`, as well as `run <CODE>` and `code <CODE>`, remain supported.
 
+The maintained executable and library inventory is documented in [docs/SCRIPT_INVENTORY.md](docs/SCRIPT_INVENTORY.md). The current tree does not contain the previously suspected legacy names (`FLOXIN_NET`, `NETCTL`, `MASTER`, `B`, `dv`, or `EMERGENCY`). The remaining scripts are intentionally separate because they provide distinct diagnostics, lifecycle, monitoring, simulation, API, or recovery functions.
+
 ## Security and privacy notes
 
 The resolver binds to localhost by default. Query logs are stored locally in `~/dnsmasq/queries.log`; they may contain domain names and should be treated as private. Upstream DNS requests go to the configured provider. Review providers and blocklists before use, and do not run downloaded shell code without inspecting it.
