@@ -123,7 +123,7 @@ class FloxinVpnService : VpnService() {
 
     private fun notification(): Notification = NotificationCompat.Builder(this, CHANNEL_ID)
         .setContentTitle("FLOXIN NET")
-        .setContentText("DNS protection is active")
+        .setContentText(getString(R.string.status_running))
         .setSmallIcon(R.drawable.ic_floxin_notification)
         .setOngoing(true)
         .setCategory(NotificationCompat.CATEGORY_SERVICE)

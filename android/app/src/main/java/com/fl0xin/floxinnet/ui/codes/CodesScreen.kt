@@ -9,7 +9,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fl0xin.floxinnet.R
-import com.fl0xin.floxinnet.ui.components.Page
+import com.fl0xin.floxinnet.ui.components.*
 
 @Composable
 fun CodesScreen(vm: CodesViewModel = viewModel()) {
@@ -18,13 +18,13 @@ fun CodesScreen(vm: CodesViewModel = viewModel()) {
     Page(stringResource(R.string.codes_title)) {
         OutlinedTextField(query, vm::search, label = { Text(stringResource(R.string.search_codes)) }, modifier = Modifier.fillMaxWidth())
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(codes) { code ->
-                Card(Modifier.fillMaxWidth()) {
+            items(codes, key = { it["code"].orEmpty() }) { code ->
+                PremiumCard(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(12.dp)) {
                         Text(code["code"].orEmpty(), style = MaterialTheme.typography.titleMedium)
                         Text("${code["mode"]} · ${code["provider"]} · ${code["net"]}")
                         Text(code["desc"].orEmpty())
-                        TextButton(onClick = {}) { Text(stringResource(R.string.apply)) }
+                        SecondaryButton(stringResource(R.string.apply)) { }
                     }
                 }
             }

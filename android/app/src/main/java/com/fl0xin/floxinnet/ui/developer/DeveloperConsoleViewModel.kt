@@ -3,6 +3,7 @@ package com.fl0xin.floxinnet.ui.developer
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.fl0xin.floxinnet.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -10,7 +11,7 @@ import kotlinx.coroutines.launch
 
 class DeveloperConsoleViewModel(app: Application) : AndroidViewModel(app) {
     private val runner = DeveloperConsoleRunner(app)
-    private val _lines = MutableStateFlow(listOf("FLOXIN NET Developer Console", "Type setup to install FLOXIN-NET, or help for commands.", ""))
+    private val _lines = MutableStateFlow(listOf(app.getString(R.string.developer_title), app.getString(R.string.developer_hint), ""))
     val lines: StateFlow<List<String>> = _lines
     private val _fontSize = MutableStateFlow(13)
     val fontSize: StateFlow<Int> = _fontSize

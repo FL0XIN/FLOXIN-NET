@@ -9,7 +9,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fl0xin.floxinnet.R
-import com.fl0xin.floxinnet.ui.components.Page
+import com.fl0xin.floxinnet.ui.components.*
 
 @Composable
 fun ProvidersScreen(vm: ProvidersViewModel = viewModel()) {
@@ -18,8 +18,8 @@ fun ProvidersScreen(vm: ProvidersViewModel = viewModel()) {
     Page(stringResource(R.string.providers_title)) {
         Text(stringResource(R.string.current, selected))
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(providers) { provider ->
-                Card(Modifier.fillMaxWidth()) {
+            items(providers, key = { it["name"].orEmpty() }) { provider ->
+                PremiumCard(Modifier.fillMaxWidth()) {
                     Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                         Column(Modifier.weight(1f)) {
                             Text(provider["name"].orEmpty(), style = MaterialTheme.typography.titleMedium)
