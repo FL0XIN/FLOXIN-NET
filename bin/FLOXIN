@@ -763,10 +763,10 @@ cmd_doctor() {
     fi
     echo ""
 
-    # ─── 8) Platform API (optional) ───
-    echo -e "${CC}[8/8] Platform API (optional)${CZ}"
+    # ─── 8) Termux API (optional) ───
+    echo -e "${CC}[8/8] Termux API (optional)${CZ}"
     if command -v termux-open >/dev/null 2>&1; then
-        echo -e "  ${CG}OK${CZ} platform-api installed"
+        echo -e "  ${CG}OK${CZ} termux-api installed"
     else
         echo -e "  ${CC}INFO${CZ} Not installed — optional for VPN launch"
     fi
@@ -807,10 +807,10 @@ cmd_env() {
     echo -e "  Arch:      ${CG}$(uname -m)${CZ}"
     echo ""
 
-    # ─── Platform ───
-    echo -e "${CC}Platform${CZ}"
+    # ─── Termux ───
+    echo -e "${CC}Termux${CZ}"
     local pkg_v=$(pkg list-installed 2>/dev/null | grep "^termux-tools/" | awk '{print $2}' | head -1)
-    echo -e "  Runtime:   ${CG}${pkg_v:-unknown}${CZ}"
+    echo -e "  Termux:    ${CG}${pkg_v:-unknown}${CZ}"
     echo -e "  Home:      ${CG}$HOME${CZ}"
     echo -e "  PREFIX:    ${CG}$PREFIX${CZ}"
     echo ""
@@ -868,7 +868,7 @@ cmd_env() {
         echo -e "  ${CY}→ Set \$EDITOR: export EDITOR=nano${CZ}"
     fi
     if ! command -v termux-open >/dev/null 2>&1; then
-        echo -e "  ${CY}→ Install platform API for VPN launch${CZ}"
+        echo -e "  ${CY}→ Install Termux:API for VPN launch${CZ}"
     fi
     if [ -n "$vpn" ]; then
         echo -e "  ${CY}→ VPN active — DNS may not work${CZ}"
@@ -1211,6 +1211,7 @@ shell() {
             doctor|fix)   cmd_doctor ;;
             env|info)     cmd_env ;;
             export|backup) cmd_export ;;
+            api)          bash "$HOME/bin/FLOXIN_API" "${arg:-status}" ;;
             short|sh)     cmd_short ;;
             [0-9])        cmd_apply_alias "$cmd" ;;
             F|S|W|M|H|V|A|Z|B|C|R|X|T|L)
@@ -1279,6 +1280,7 @@ case "${1:-shell}" in
     status)           cmd_status ;;
     stop)             cmd_stop ;;
     export|backup)    cmd_export ;;
+    api)              bash "$HOME/bin/FLOXIN_API" "${2:-status}" ;;
     advanced|adv)     cmd_throttle_menu ;;
     doctor|fix)       cmd_doctor ;;
     env|info)         cmd_env ;;

@@ -1,0 +1,117 @@
+openapi: 3.0.3
+info:
+  title: FLOXIN NET API
+  version: 1.0.0
+  description: Localhost-only REST API for the FLOXIN NET DNS backend.
+servers:
+  - url: http://127.0.0.1:8080
+security:
+  - bearerAuth: []
+paths:
+  /api/v1/status:
+    get:
+      summary: Get DNS status
+      responses:
+        '200':
+          description: Current status
+          content: {application/json: {schema: {$ref: '#/components/schemas/Status'}}}
+  /api/v1/stats:
+    get:
+      summary: Get SQLite-backed statistics
+      responses:
+        '200':
+          description: Statistics
+          content: {application/json: {schema: {$ref: '#/components/schemas/Stats'}}}
+  /api/v1/start:
+    post: {summary: Start DNS, responses: {'200': {description: Started}}}
+  /api/v1/stop:
+    post: {summary: Stop DNS, responses: {'200': {description: Stopped}}}
+  /api/v1/restart:
+    post: {summary: Restart DNS, responses: {'200': {description: Restarted}}}
+  /api/v1/scenarios:
+    get:
+      summary: List scenarios
+      responses: {'200': {description: Scenario list}}
+  /api/v1/scenario:
+    post:
+      summary: Apply a scenario
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/ScenarioRequest'}}}
+      responses: {'200': {description: Applied}, '404': {description: Not found}}
+  /api/v1/providers:
+    get:
+      summary: List DNS providers
+      responses: {'200': {description: Provider list}}
+  /api/v1/provider:
+    post:
+      summary: Select a DNS provider
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/ProviderRequest'}}}
+      responses: {'200': {description: Applied}, '404': {description: Not found}}
+  /api/v1/queries:
+    get:
+      summary: Get recent queries from SQLite
+      parameters:
+        - {name: limit, in: query, schema: {type: integer, minimum: 1, maximum: 500, default: 50}}
+      responses: {'200': {description: Query list}}
+  /api/v1/blocklist:
+    get: {summary: Get blocklist information, responses: {'200': {description: Blocklist info}}}
+  /api/v1/doctor:
+    get: {summary: Run non-destructive diagnostics, responses: {'200': {description: Diagnostics}}}
+  /api/v1/env:
+    get: {summary: Get runtime environment, responses: {'200': {description: Environment}}}
+  /api/v1/config:
+    get: {summary: Get separate runtime config, responses: {'200': {description: Config}}}
+    post:
+      summary: Update separate runtime config
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/ConfigRequest'}}}
+      responses: {'200': {description: Updated}}
+  /api/v1/ws:
+    get:
+      summary: WebSocket endpoint
+      description: WebSocket upgrade endpoint. Send Authorization: Bearer token during the handshake.
+      responses: {'101': {description: Switching Protocols}}
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer}
+  schemas:
+    Status:
+      type: object
+      required: [running, mode, provider, port]
+      properties:
+        running: {type: boolean}
+        pid: {type: integer, nullable: true}
+        mode: {type: string}
+        provider: {type: string}
+        uptime_seconds: {type: integer}
+        port: {type: integer}
+    Stats:
+      type: object
+      properties:
+        total_queries: {type: integer}
+        blocked: {type: integer}
+        cached: {type: integer}
+        forwarded: {type: integer}
+        blocklist_size: {type: integer}
+        cache_size: {type: integer}
+    ScenarioRequest:
+      type: object
+      required: [code]
+      properties: {code: {type: string}}
+    ProviderRequest:
+      type: object
+      required: [name]
+      properties: {name: {type: string}}
+    ConfigRequest:
+      type: object
+      properties:
+        mode: {type: string}
+        network: {type: string}
+        provider: {type: string}
+        cache_ttl: {type: integer, minimum: 0, maximum: 86400}
+        logging: {type: boolean}
+        theme: {type: string}
