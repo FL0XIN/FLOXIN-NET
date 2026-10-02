@@ -8,6 +8,7 @@ import android.net.VpnService
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import com.fl0xin.floxinnet.R
 import com.fl0xin.floxinnet.data.BlocklistStore
 import com.fl0xin.floxinnet.data.FloxinDatabase
 import com.fl0xin.floxinnet.dns.DnsConfig
@@ -123,7 +124,7 @@ class FloxinVpnService : VpnService() {
     private fun notification(): Notification = NotificationCompat.Builder(this, CHANNEL_ID)
         .setContentTitle("FLOXIN NET")
         .setContentText("DNS protection is active")
-        .setSmallIcon(android.R.drawable.stat_sys_warning)
+        .setSmallIcon(R.drawable.ic_floxin_notification)
         .setOngoing(true)
         .setCategory(NotificationCompat.CATEGORY_SERVICE)
         .build()

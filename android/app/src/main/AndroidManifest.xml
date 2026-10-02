@@ -6,7 +6,7 @@
         <package android:name="com.termux" />
         <package android:name="com.termux.api" />
     </queries>
-    <application android:name=".FloxinApplication" android:theme="@style/Theme.Floxin" android:label="FLOXIN NET" android:allowBackup="false" android:supportsRtl="true">
+    <application android:name=".FloxinApplication" android:theme="@style/Theme.Floxin.Splash" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:label="FLOXIN NET" android:allowBackup="false" android:supportsRtl="true">
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" />

@@ -6,4 +6,9 @@
         <item name="android:statusBarColor">#0A0E1A</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
+    <style name="Theme.Floxin.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/floxin_dark_bg</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_floxin_splash</item>
+        <item name="postSplashScreenTheme">@style/Theme.Floxin</item>
+    </style>
 </resources>
