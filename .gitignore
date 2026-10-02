@@ -9,3 +9,4 @@ queries.log
 __pycache__/
 .venv/
 .DS_Store
+!lib/.floxin_*.sh
