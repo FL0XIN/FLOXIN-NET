@@ -40,7 +40,7 @@ The previous command names remain available as symlinks for compatibility, inclu
 
 ## Languages
 
-[English](README.md) · [العربية](README_AR.md) · [简体中文](README_ZH.md) · [Español](README_ES.md) · [Français](README_FR.md) · [Русский](README_RU.md)
+[English](README.md) · [العربية](README_AR.md) · [简体中文](README_ZH.md) · [Русский](README_RU.md)
 
 The organized repository tree is documented in [docs/PROJECT_TREE.md](docs/PROJECT_TREE.md).
 
