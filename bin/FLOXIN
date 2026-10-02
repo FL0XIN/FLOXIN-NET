@@ -496,7 +496,7 @@ cmd_quick() {
         local upper=$(echo "$word" | tr '[:lower:]' '[:upper:]')
         case "$upper" in
             RESET) cmd_reset ;;
-            CHECK) bash "$HOME/bin/CHECK" 2>/dev/null ;;
+            QUICKCHECK) bash "$HOME/bin/QUICKCHECK" 2>/dev/null ;;
             STOP)  cmd_stop ;;
             STATUS) cmd_status ;;
             LOG)   cmd_history ;;
@@ -512,7 +512,7 @@ cmd_dv() {
     shopt -s nocasematch
     clr
     echo -e "${CR}=========================================${CZ}"
-    echo -e "${CR}     FLOXIN DV - Emergency Mode${CZ}"
+    echo -e "${CR}     FLOXIN rescue - Emergency Mode${CZ}"
     echo -e "${CR}     $(date '+%Y-%m-%d %H:%M:%S')${CZ}"
     echo -e "${CR}=========================================${CZ}"
     echo ""
@@ -566,21 +566,21 @@ cmd_throttle_menu() {
         echo -e "  ${CG}[1]${CZ} Throttle Sim test"
         echo -e "  ${CG}[2]${CZ} Start Throttle Sim"
         echo -e "  ${CG}[3]${CZ} Stop Throttle Sim"
-        echo -e "  ${CG}[4]${CZ} WEHACK - port scan"
-        echo -e "  ${CG}[5]${CZ} DNSWITCH - auto best DNS"
-        echo -e "  ${CG}[6]${CZ} SAFE_MODE - prepare"
-        echo -e "  ${CG}[7]${CZ} PANIC - emergency"
+        echo -e "  ${CG}[4]${CZ} NETPROBE - port scan"
+        echo -e "  ${CG}[5]${CZ} DNSPICK - auto best DNS"
+        echo -e "  ${CG}[6]${CZ} PRESAFE - prepare"
+        echo -e "  ${CG}[7]${CZ} NETKILL - emergency"
         echo -e "  ${CR}[0]${CZ} Back"
         echo ""
         read -p "  > " _adv
         case "$_adv" in
-            1) bash "$HOME/bin/THROTTLE_SIM" test ;;
-            2) bash "$HOME/bin/THROTTLE_SIM" start ;;
-            3) bash "$HOME/bin/THROTTLE_SIM" stop ;;
-            4) bash "$HOME/bin/WEHACK" all ;;
-            5) bash "$HOME/bin/DNSWITCH" auto ;;
-            6) bash "$HOME/bin/SAFE_MODE" ;;
-            7) bash "$HOME/bin/PANIC" ;;
+            1) bash "$HOME/bin/NETTHROTTLE" test ;;
+            2) bash "$HOME/bin/NETTHROTTLE" start ;;
+            3) bash "$HOME/bin/NETTHROTTLE" stop ;;
+            4) bash "$HOME/bin/NETPROBE" all ;;
+            5) bash "$HOME/bin/DNSPICK" auto ;;
+            6) bash "$HOME/bin/PRESAFE" ;;
+            7) bash "$HOME/bin/NETKILL" ;;
             0|"") return ;;
         esac
         echo ""
@@ -915,7 +915,7 @@ cmd_help() {
     echo -e "  ${CG}VPN${CZ}          Use WARP VPN"
     echo -e "  ${CG}ALL${CZ}          Everything at once"
     echo -e "  ${CG}ALMOST-OUT${CZ}   Network almost out"
-    echo -e "  ${CG}CHECK${CZ}        Check connection"
+    echo -e "  ${CG}QUICKCHECK${CZ}        Check connection"
     echo -e "  ${CG}RESET${CZ}        Back to defaults"
     echo ""
     echo -e "  ${CY}Chain:${CZ} ${CG}FAST SAVE VPN${CZ}  (multiple at once)"
@@ -926,6 +926,7 @@ cmd_help() {
     echo -e "  ${CG}status${CZ}          Show detailed status"
     echo -e "  ${CG}clear${CZ}           Clear screen"
     echo -e "  ${CG}exit${CZ}            Exit shell"
+    echo -e "  ${CG}netguard start${CZ}  Sleep protection mode"
     echo ""
     echo -e "${CC}═══════ CONFIGURATION ═══════${CZ}"
     echo -e "  ${CG}mode${CZ}            Change mode (Booster / Saver / 2X1)"
@@ -1191,10 +1192,10 @@ shell() {
             start)        cmd_start ;;
             stop)         cmd_stop ;;
             restart)      cmd_stop; cmd_start ;;
-            test)         bash "$HOME/bin/TESTALL" 2>/dev/null || bash "$HOME/bin/CHECK" ;;
-            sousg)        bash "$HOME/bin/SOUSG" ;;
-            netstate)     bash "$HOME/bin/NETSTATE" ;;
-            panic)        bash "$HOME/bin/PANIC" ;;
+            test|netcheck) bash "$HOME/bin/NETCHECK" 2>/dev/null || bash "$HOME/bin/QUICKCHECK" ;;
+            netmon|sousg)  bash "$HOME/bin/NETMON" ;;
+            netstat|netstate) bash "$HOME/bin/NETSTAT" ;;
+            netkill|panic) bash "$HOME/bin/NETKILL" ;;
             code|codes)   
                 if [ "$cmd" = "codes" ]; then cmd_codes; else cmd_code "$arg"; fi ;;
             reload)
@@ -1206,12 +1207,15 @@ shell() {
             run|scenario|sc)  cmd_run "$arg" ;;
             scenarios)    cmd_scenarios ;;
             quick)        cmd_quick ;;
-            dv|dv-mode)   cmd_dv ;;
+            rescue|dv|dv-mode) cmd_dv ;;
             advanced|adv) cmd_throttle_menu ;;
             doctor|fix)   cmd_doctor ;;
             env|info)     cmd_env ;;
             export|backup) cmd_export ;;
-            api)          bash "$HOME/bin/FLOXIN_API" "${arg:-status}" ;;
+            api)          bash "$HOME/bin/FLOXIN-API" "${arg:-status}" ;;
+            netguard|guard)
+                read -r -a guard_args <<< "$arg"
+                bash "$HOME/bin/NETGUARD" "${guard_args[@]}" ;;
             short|sh)     cmd_short ;;
             [0-9])        cmd_apply_alias "$cmd" ;;
             F|S|W|M|H|V|A|Z|B|C|R|X|T|L)
@@ -1236,7 +1240,7 @@ shell() {
                         local _w=$(echo "$word" | tr '[:lower:]' '[:upper:]')
                         case "$_w" in
                             RESET) cmd_reset ;;
-                            CHECK) bash "$HOME/bin/CHECK" 2>/dev/null ;;
+                            QUICKCHECK) bash "$HOME/bin/QUICKCHECK" 2>/dev/null ;;
                             STOP)  cmd_stop ;;
                             STATUS) cmd_status ;;
                             LOG)   cmd_history ;;
@@ -1273,17 +1277,17 @@ shell() {
 # ─── Dispatcher ───
 case "${1:-shell}" in
     shell|launch|"")  shell ;;
-    bg)               cmd_bg ;;
-    start)            cmd_start ;;
-    restart)          cmd_stop; sleep 1; cmd_bg ;;
-    DV|dv|DV-MODE)    cmd_dv ;;
+    bg)                cmd_bg ;;
+    start)             cmd_start ;;
+    restart)           cmd_stop; sleep 1; cmd_bg ;;
+    rescue|DV|dv|DV-MODE) cmd_dv ;;
     status)           cmd_status ;;
     stop)             cmd_stop ;;
     export|backup)    cmd_export ;;
-    api)              bash "$HOME/bin/FLOXIN_API" "${2:-status}" ;;
+    api)              bash "$HOME/bin/FLOXIN-API" "${2:-status}" ;;
     advanced|adv)     cmd_throttle_menu ;;
     doctor|fix)       cmd_doctor ;;
     env|info)         cmd_env ;;
     help|-h)          cmd_help ;;
-    *)                echo "Usage: FLOXIN [shell|bg|start|restart|DV|status|stop|export|help]" ;;
+    *)                echo "Usage: FLOXIN [shell|start|restart|rescue|status|stop|export|help]" ;;
 esac

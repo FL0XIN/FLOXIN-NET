@@ -26,7 +26,11 @@ cd floxin-net
 
 ## الأوامر الأساسية
 
-يشغّل `FLOXIN` الواجهة التفاعلية. ويبدأ `FLOXIN bg` خادم DNS في الخلفية، بينما يفحص `FLOXIN doctor` المتطلبات ويصلحها، ويعرض `FLOXIN env` معلومات النظام، وينشئ `FLOXIN export` نسخة احتياطية. يدير `DNSF start|stop|restart|status|test` الخادم، ويشغّل `TESTALL` الفحوصات. وتظل أوامر `FAST` و`SAVE` و`HIDE` و`VPN` و`ALL`، إلى جانب `run <CODE>` و`code <CODE>`، متاحة.
+يشغّل `FLOXIN` الواجهة التفاعلية. ويبدأ `FLOXIN start` خادم DNS في الخلفية، بينما يفحص `FLOXIN doctor` المتطلبات ويصلحها، ويعرض `FLOXIN env` معلومات النظام، وينشئ `FLOXIN export` نسخة احتياطية. يدير `DNSMGR start|stop|restart|status|test` الخادم، ويشغّل `NETCHECK` الفحوصات. وتظل أوامر `FAST` و`SAVE` و`HIDE` و`VPN` و`ALL`، إلى جانب `run <CODE>` و`code <CODE>`، متاحة.
+
+يوفّر `NETGUARD start --hours 8` وضع حماية أثناء النوم: يستخدم قائمة حجب DNS معزولة، يسجّل محاولات الاستعلام في `~/.floxin_netguard/`، ويتوقف تلقائيًا بعد انتهاء المؤقت. استخدم `NETGUARD status` أو `NETGUARD log` أو `NETGUARD stop`. لا يغيّر NETGUARD قواعد iptables تلقائيًا؛ ويستخدم حجب DNS الآمن كحل احتياطي على الأجهزة التي لا تملك root.
+
+الأسماء القديمة مثل `DNSF` و`DNSWITCH` و`WEHACK` و`THROTTLE_SIM` و`SOUSG` و`NETSTATE` و`TESTALL` و`SAFE_MODE` و`PANIC` و`CHECK` و`FLOXIN_API` محفوظة كروابط رمزية للتوافق.
 
 ## ملاحظات أمنية وخصوصية
 

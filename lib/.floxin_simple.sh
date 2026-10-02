@@ -22,7 +22,7 @@ SIMPLE_ALIASES=(
     "THROTTLED|VPN-WARP|Throttled — bypass with VPN"
 
     # ─── Utility ───
-    "CHECK|CHECK|Check connection + status"
+    "QUICKCHECK|QUICKCHECK|Check connection + status"
     "RESET|RESET|Reset to defaults"
     "STOP|STOP|Stop all"
     "STATUS|STATUS|Show status"
@@ -73,7 +73,7 @@ list_simple() {
 
     # Group 3: Utility
     echo -e "  ${CY}─── Utility ───${CZ}"
-    printf "  ${CG}%-14s${CZ} %s\n" "CHECK" "Check status"
+    printf "  ${CG}%-14s${CZ} %s\n" "QUICKCHECK" "Check status"
     printf "  ${CG}%-14s${CZ} %s\n" "LOG" "Show history"
     printf "  ${CG}%-14s${CZ} %s\n" "RESET" "Reset everything"
     printf "  ${CG}%-14s${CZ} %s\n" "STOP" "Stop all"

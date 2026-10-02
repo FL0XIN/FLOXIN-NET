@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# NETMON v3 — Live DNS Activity Monitor
+
+CG='\033[32m'; CR='\033[31m'; CY='\033[33m'; CC='\033[36m'; CZ='\033[0m'
+QLOG="$HOME/dnsmasq/queries.log"
+
+[ -f "$QLOG" ] && START=$(wc -l < "$QLOG") || START=0
+STIME=$(date +%s)
+
+trap 'echo ""; echo -e "${CC}--- Final ---${CZ}"; \
+      [ -f "$QLOG" ] && NOW=$(wc -l < "$QLOG") || NOW=0; \
+      T=$((NOW - START)); EL=$(($(date +%s) - STIME)); \
+      echo -e "  Total: $T queries in ${EL}s"; \
+      exit 0' INT
+
+while true; do
+    clear
+    EL=$(($(date +%s) - STIME)); SM=$((EL/60)); SS=$((EL%60))
+    echo -e "${CC}═══════════════════════════════════════${CZ}"
+    echo -e "${CC}  NETMON v3 — DNS Activity${CZ}"
+    echo -e "${CC}  ${SM}m ${SS}s${CZ}"
+    echo -e "${CC}═══════════════════════════════════════${CZ}"
+    echo ""
+
+    if [ -f "$QLOG" ]; then
+        NOW=$(wc -l < "$QLOG")
+        DELTA=$((NOW - START))
+        [ $EL -gt 0 ] && RATE=$(python3 -c "print(f'{$DELTA/$EL:.1f}')") || RATE="0.0"
+
+        echo -e "  ${CG}Total:${CZ}    $DELTA queries"
+        echo -e "  ${CY}Rate:${CZ}     $RATE/s"
+        echo ""
+
+        BLK=$(tail -30 "$QLOG" | grep -c "|BLOCK|")
+        OK=$(tail -30 "$QLOG" | grep -c "|OK|")
+        CA=$(tail -30 "$QLOG" | grep -c "|CACHE|")
+        echo -e "  ${CR}Blocked:${CZ}  $BLK"
+        echo -e "  ${CG}Allowed:${CZ}  $OK"
+        echo -e "  ${CY}Cached:${CZ}   $CA"
+        echo ""
+
+        echo -e "${CC}--- Last 8 ---${CZ}"
+        tail -8 "$QLOG" 2>/dev/null | while IFS='|' read -r ts qt act qn res; do
+            case "$act" in
+                BLOCK) echo -e "  ${CR}[B]${CZ} $qt $qn" ;;
+                CACHE) echo -e "  ${CY}[C]${CZ} $qt $qn" ;;
+                OK)    echo -e "  ${CG}[+]${CZ} $qt $qn" ;;
+                *)     echo -e "  [?] $ts $act $qn" ;;
+            esac
+        done
+    else
+        echo -e "  ${CR}No query log yet${CZ}"
+        echo -e "  Run: DNSMGR restart"
+    fi
+
+    echo ""
+    echo -e "${CC}═══════════════════════════════════════${CZ}"
+    echo -e "${CY}  Ctrl+C to exit${CZ}"
+    sleep 2
+done

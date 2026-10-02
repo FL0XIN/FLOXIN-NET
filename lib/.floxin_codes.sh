@@ -164,7 +164,7 @@ CODES=(
     "FLOX-SIM-SAVE|DATA_SAVER|Egypt-TEData|SIM||SIM + save"
     "FLOX-BOTH-SAVE|DATA_SAVER|AdGuard|BOTH||Both + save"
     "FLOX-DOCTOR|BOOSTER|Cloudflare|AUTO||Run doctor"
-    "FLOX-PANIC|BOOSTER|Cloudflare|AUTO||Emergency reset"
+    "FLOX-NETKILL|BOOSTER|Cloudflare|AUTO||Emergency reset"
     "FLOX-MONITOR|BOOSTER|Cloudflare|AUTO||Live monitor"
     "FLOX-TEST|BOOSTER|Cloudflare|AUTO||Full test"
     "FLOX-SWITCH|BOOSTER|Cloudflare|AUTO||Auto-switch"

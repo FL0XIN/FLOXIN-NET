@@ -28,7 +28,7 @@ logging.getLogger("dnslib.server").setLevel(logging.CRITICAL)
 logging.getLogger("dnslib").propagate = False
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-BLOCKLIST_FILE = os.path.join(BASE, "blocklist.txt")
+BLOCKLIST_FILE = os.environ.get("FLOXIN_BLOCKLIST_FILE", os.path.join(BASE, "blocklist.txt"))
 CACHE_TTL = 600
 PORT = int(os.environ.get("FLOXIN_PORT", "5353"))
 BIND_ADDRESS = os.environ.get("FLOXIN_BIND_ADDRESS", "127.0.0.1")
@@ -64,7 +64,7 @@ def load_blocklist():
 
 
 # ═══ Query Logging ═══
-QUERY_LOG = os.path.join(BASE, "queries.log")
+QUERY_LOG = os.environ.get("FLOXIN_QUERY_LOG", os.path.join(BASE, "queries.log"))
 
 def log_query(qname, qtype, action, result=""):
     """يسجل استعلام في queries.log مع rotation."""

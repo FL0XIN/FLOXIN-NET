@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# NETSTAT v2 — Accurate network status
+
+CG='\033[32m'; CR='\033[31m'; CY='\033[33m'; CC='\033[36m'; CZ='\033[0m'
+
+dns_on()   { pgrep -f "floxin_dns.py" > /dev/null 2>&1; }
+proxy_on() { pgrep -f "throttle_proxy.py" > /dev/null 2>&1; }
+
+# كشف VPN — طرق حقيقية
+vpn_detect() {
+    # 1) interfaces (tun/ppp)
+    if ifconfig 2>/dev/null | grep -qE "^(tun|ppp|wg)[0-9]"; then
+        return 0
+    fi
+    # 2) route (لو متاح)
+    if [ -r /proc/net/route ]; then
+        if grep -q "tun\|ppp" /proc/net/route 2>/dev/null; then
+            return 0
+        fi
+    fi
+    # 3) getprop
+    if getprop 2>/dev/null | grep -qi "vpn"; then
+        return 0
+    fi
+    return 1
+}
+
+# كشف الاتصال بالنت
+net_works() {
+    timeout 5 curl -s -o /dev/null -w "%{http_code}" --max-time 4 "https://1.1.1.1" 2>/dev/null | grep -qE "200|301|302|400|403"
+}
+
+# Speed
+speed_now() {
+    timeout 8 curl -o /dev/null -s -w "%{speed_download}" --max-time 6 "https://speed.cloudflare.com/__down?bytes=150000" 2>/dev/null
+}
+
+echo -e "${CC}=========================================${CZ}"
+echo -e "${CC}  NETSTAT - $(date '+%H:%M:%S')${CZ}"
+echo -e "${CC}=========================================${CZ}"
+echo ""
+
+# DNS
+if dns_on; then
+    PID=$(pgrep -f "floxin_dns.py" | head -1)
+    echo -e "  DNS Server   : ${CG}ON${CZ}  (PID: $PID)"
+else
+    echo -e "  DNS Server   : ${CR}OFF${CZ}"
+fi
+
+# DNS Response
+DNS_OK=0
+if dns_on; then
+    R=$(timeout 2 dig @127.0.0.1 -p 5353 google.com +short +timeout=1 2>/dev/null | grep -v ";" | head -1)
+    if [ -n "$R" ] && [ "$R" != "0.0.0.0" ]; then
+        echo -e "  DNS Response : ${CG}OK${CZ}   ($R)"
+        DNS_OK=1
+    else
+        echo -e "  DNS Response : ${CR}NO RESPONSE${CZ}"
+    fi
+
+    B=$(timeout 2 dig @127.0.0.1 -p 5353 doubleclick.net +short +timeout=1 2>/dev/null | grep -v ";" | head -1)
+    [ "$B" = "0.0.0.0" ] && echo -e "  Blocking     : ${CG}ON${CZ}" || echo -e "  Blocking     : ${CY}OFF${CZ}"
+fi
+
+# Proxy
+proxy_on && echo -e "  Throttle Sim : ${CY}ON${CZ}" || echo -e "  Throttle Sim : ${CG}OFF${CZ}"
+
+# VPN
+if vpn_detect; then
+    echo -e "  VPN          : ${CY}DETECTED${CZ}"
+    ifconfig 2>/dev/null | grep -E "^(tun|ppp|wg)" | head -3 | sed 's/^/                 /'
+    VPN=1
+else
+    echo -e "  VPN          : ${CG}OFF${CZ}"
+    VPN=0
+fi
+
+# Net works?
+echo ""
+if net_works; then
+    S=$(speed_now)
+    KB=$(python3 -c "print(f'{$S/1024:.0f}')" 2>/dev/null || echo "?")
+    if python3 -c "exit(0 if $S < 100000 else 1)" 2>/dev/null; then
+        echo -e "  Internet     : ${CY}THROTTLED${CZ} (${KB} KB/s)"
+    else
+        echo -e "  Internet     : ${CG}OK${CZ} (${KB} KB/s)"
+    fi
+    NET=1
+else
+    echo -e "  Internet     : ${CR}NO CONNECTION${CZ}"
+    NET=0
+fi
+
+# Overall
+echo ""
+echo -e "${CC}=========================================${CZ}"
+if [ $VPN -eq 1 ]; then
+    echo -e "  ${CY}>>> VPN ACTIVE — DNS may not work <<<${CZ}"
+    echo -e "  ${CC}    (WARP/Psiphon blocks local DNS)${CZ}"
+    echo -e "  ${CC}    To use local DNS: close VPN${CZ}"
+elif [ $DNS_OK -eq 1 ] && [ $NET -eq 1 ]; then
+    echo -e "  ${CG}>>> SYSTEM RUNNING <<<${CZ}"
+elif [ $NET -eq 0 ]; then
+    echo -e "  ${CR}>>> NO INTERNET <<<${CZ}"
+elif [ $DNS_OK -eq 0 ]; then
+    echo -e "  ${CY}>>> DNS NOT RESPONDING <<<${CZ}"
+    echo -e "  ${CC}    Try: FLOXIN restart${CZ}"
+else
+    echo -e "  ${CY}>>> PARTIAL <<<${CZ}"
+fi
+echo -e "${CC}=========================================${CZ}"

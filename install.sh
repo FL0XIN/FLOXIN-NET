@@ -55,7 +55,7 @@ install_packages
 install_dnslib
 
 # Deploy the existing project files; do not rebuild or discard user data.
-for f in "$ROOT_DIR"/bin/*; do cp "$f" "$HOME_BIN/" && chmod +x "$HOME_BIN/$(basename "$f")" || bad "copy $(basename "$f")"; done
+for f in "$ROOT_DIR"/bin/*; do cp -a "$f" "$HOME_BIN/" && chmod +x "$HOME_BIN/$(basename "$f")" || bad "copy $(basename "$f")"; done
 for f in "$ROOT_DIR"/lib/.*.sh; do cp "$f" "$HOME/" || bad "copy $(basename "$f")"; done
 cp "$ROOT_DIR/dns/floxin_dns.py" "$DNS_DIR/" || bad "copy floxin_dns.py"
 chmod +x "$DNS_DIR/floxin_dns.py"
@@ -87,7 +87,7 @@ fi
 EOF
     ok "Android auto-start added"
 else
-    info "Auto-start not added; use FLOXIN bg or DNSF start"
+    info "Auto-start not added; use FLOXIN start or DNSMGR start"
 fi
 
 if [ "$INSTALL_FAIL" -eq 0 ]; then

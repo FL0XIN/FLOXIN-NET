@@ -1,5 +1,5 @@
 # ~/.floxin_net.sh — FLOXIN Network Shared Library
-# يقرأه DNSF و FLOXIN
+# يقرأه DNSMGR و FLOXIN
 
 # ═══ المسارات ═══
 export FLOXIN_DNS_DIR="$HOME/dnsmasq"
@@ -75,21 +75,21 @@ floxin_net() {
     fi
 }
 
-# ═══ DNSWITCH integration ═══
+# ═══ DNSPICK integration ═══
 floxin_switch() {
-    if [ -x "$HOME/bin/DNSWITCH" ]; then
-        bash "$HOME/bin/DNSWITCH" "$@"
+    if [ -x "$HOME/bin/DNSPICK" ]; then
+        bash "$HOME/bin/DNSPICK" "$@"
     else
-        echo "DNSWITCH مش موجود"
+        echo "DNSPICK مش موجود"
     fi
 }
 
-# ═══ WEHACK integration ═══
+# ═══ NETPROBE integration ═══
 floxin_wehack() {
-    if [ -x "$HOME/bin/WEHACK" ]; then
-        bash "$HOME/bin/WEHACK" "$@"
+    if [ -x "$HOME/bin/NETPROBE" ]; then
+        bash "$HOME/bin/NETPROBE" "$@"
     else
-        echo "WEHACK مش موجود"
+        echo "NETPROBE مش موجود"
     fi
 }
 

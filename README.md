@@ -26,9 +26,13 @@ Use `./install.sh --no-install` when system packages are already present and no 
 
 ## Commands
 
-`FLOXIN` launches the interactive shell. `FLOXIN bg` starts the DNS service, `FLOXIN doctor` diagnoses and repairs dependencies, `FLOXIN env` displays system information, `FLOXIN export` creates a backup, and `FLOXIN DV` opens emergency mode. `DNSF start|stop|restart|status|test` manages the resolver. `TESTALL` runs the smoke checks. Existing quick commands such as `FAST`, `SAVE`, `HIDE`, `VPN`, and `ALL`, as well as `run <CODE>` and `code <CODE>`, remain supported.
+`FLOXIN` launches the interactive shell. `FLOXIN start` starts the DNS service, `FLOXIN doctor` diagnoses and repairs dependencies, `FLOXIN env` displays system information, `FLOXIN export` creates a backup, and `FLOXIN rescue` opens emergency mode. `DNSMGR start|stop|restart|status|test` manages the resolver. `NETCHECK` runs the smoke checks. Existing quick commands such as `FAST`, `SAVE`, `HIDE`, `VPN`, and `ALL`, as well as `run <CODE>` and `code <CODE>`, remain supported.
+
+`NETGUARD start --hours 8` enables sleep protection using an isolated strict DNS blocklist, records blocked query attempts under `~/.floxin_netguard/`, and stops automatically after the timer. Use `NETGUARD status`, `NETGUARD log`, or `NETGUARD stop` to inspect or end the session. NETGUARD does not change iptables automatically; DNS-level blocking is the safe fallback on unrooted systems.
 
 The maintained executable and library inventory is documented in [docs/SCRIPT_INVENTORY.md](docs/SCRIPT_INVENTORY.md). The current tree does not contain the previously suspected legacy names (`FLOXIN_NET`, `NETCTL`, `MASTER`, `B`, `dv`, or `EMERGENCY`). The remaining scripts are intentionally separate because they provide distinct diagnostics, lifecycle, monitoring, simulation, API, or recovery functions.
+
+The previous command names remain available as symlinks for compatibility, including `DNSF`, `DNSWITCH`, `WEHACK`, `THROTTLE_SIM`, `SOUSG`, `NETSTATE`, `TESTALL`, `SAFE_MODE`, `PANIC`, `CHECK`, and `FLOXIN_API`.
 
 ## Security and privacy notes
 

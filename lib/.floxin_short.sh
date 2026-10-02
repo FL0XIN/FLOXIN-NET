@@ -45,7 +45,7 @@ SHORT_CODES=(
     "TH|THROTTLED|Throttled"
 
     # ─── Utility ───
-    "C|CHECK|Check"
+    "C|QUICKCHECK|Check"
     "R|RESET|Reset"
     "X|STOP|Stop"
     "T|STATUS|Status"

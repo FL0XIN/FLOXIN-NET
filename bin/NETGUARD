@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# NETGUARD — sleep protection mode for FLOXIN NET
+set -u
+ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+# Installed layout has the library in $HOME; repository layout has it beside this script.
+if [ -f "$HOME/.floxin_sleepblock.sh" ]; then . "$HOME/.floxin_sleepblock.sh"; else . "$ROOT_DIR/lib/.floxin_sleepblock.sh"; fi
+DNS_DIR="${FLOXIN_DNS_DIR:-$HOME/dnsmasq}"
+DNS_SCRIPT="$DNS_DIR/floxin_dns.py"
+
+say_help() {
+    cat <<'HELP'
+NETGUARD — sleep protection mode (DNS-level fallback)
+
+  NETGUARD start              Start strict blocking until stopped
+  NETGUARD start --hours 8    Start strict blocking for 8 hours
+  NETGUARD stop               Stop protection and print a report
+  NETGUARD status             Show timer and protection state
+  NETGUARD log                Show blocked/query attempts
+  NETGUARD help               Show this help
+
+NETGUARD never changes iptables automatically. It isolates its blocklist and
+query log under ~/.floxin_netguard and uses DNS-level blocking safely.
+HELP
+}
+
+running() { [ -f "$NETGUARD_PID" ] && kill -0 "$(cat "$NETGUARD_PID" 2>/dev/null)" 2>/dev/null; }
+
+start_guard() {
+    local hours=""; local arg
+    while [ "$#" -gt 0 ]; do
+        arg="$1"; shift
+        case "$arg" in
+            --hours) [ "$#" -gt 0 ] || { echo "--hours needs a positive integer"; return 2; }; hours="$1"; shift ;;
+            --hours=*) hours="${arg#*=}" ;;
+            *) echo "Unknown option: $arg"; return 2 ;;
+        esac
+    done
+    if [ -n "$hours" ] && ! [[ "$hours" =~ ^[1-9][0-9]*$ ]]; then echo "hours must be a positive integer"; return 2; fi
+    if running; then echo "NETGUARD is already running"; return 0; fi
+    [ -f "$DNS_SCRIPT" ] || { echo "DNS server not installed: $DNS_SCRIPT"; return 1; }
+    netguard_prepare
+    touch "$NETGUARD_DIR/active"
+    if pgrep -f '[f]loxin_dns.py' >/dev/null 2>&1; then echo 'dns_was_running=1' >> "$NETGUARD_META"; else echo 'dns_was_running=0' >> "$NETGUARD_META"; fi
+    echo "Starting NETGUARD (DNS-level strict blocking)..."
+    FLOXIN_BLOCKLIST_FILE="$NETGUARD_BLOCKLIST" FLOXIN_QUERY_LOG="$NETGUARD_LOG" "$HOME/bin/DNSMGR" start >/dev/null 2>&1 || { echo "Could not start DNSMGR"; return 1; }
+    if [ -n "$hours" ]; then
+        nohup bash "$0" __timer "$hours" >/dev/null 2>&1 &
+        echo $! > "$NETGUARD_PID"
+        echo "NETGUARD active for ${hours}h"
+    else
+        echo "NETGUARD active until stop (use NETGUARD stop)"
+    fi
+    echo "Storage: $NETGUARD_DIR"
+}
+
+stop_guard() {
+    if [ ! -f "$NETGUARD_DIR/active" ] && ! running; then
+        echo "NETGUARD is not active"
+        return 0
+    fi
+    if running; then kill "$(cat "$NETGUARD_PID")" 2>/dev/null || true; fi
+    rm -f "$NETGUARD_PID"
+    rm -f "$NETGUARD_DIR/active"
+    if pgrep -f '[f]loxin_dns.py' >/dev/null 2>&1; then "$HOME/bin/DNSMGR" stop >/dev/null 2>&1 || true; fi
+    if grep -q '^dns_was_running=1$' "$NETGUARD_META" 2>/dev/null; then "$HOME/bin/DNSMGR" start >/dev/null 2>&1 || true; fi
+    netguard_report
+    echo "NETGUARD stopped"
+}
+
+status_guard() {
+    if [ -f "$NETGUARD_DIR/active" ]; then
+        if running; then echo "NETGUARD: running (timer PID $(cat "$NETGUARD_PID"))"; else echo "NETGUARD: running without timer"; fi
+    else
+        echo "NETGUARD: stopped"
+    fi
+    [ -f "$NETGUARD_BLOCKLIST" ] && echo "Strict blocklist: $(wc -l < "$NETGUARD_BLOCKLIST") entries"
+    netguard_report
+}
+
+case "${1:-help}" in
+    start) shift; start_guard "$@" ;;
+    stop) stop_guard ;;
+    status) status_guard ;;
+    log) [ -f "$NETGUARD_LOG" ] && tail -100 "$NETGUARD_LOG" || echo "No NETGUARD log yet" ;;
+    __timer) sleep "$(( ${2:-1} * 3600 ))"; "$0" stop ;;
+    help|-h|--help) say_help ;;
+    *) echo "Unknown command: $1"; say_help; exit 2 ;;
+esac
