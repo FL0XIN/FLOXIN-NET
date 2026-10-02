@@ -1,0 +1,201 @@
+#!/usr/bin/env bash
+# DNSWITCH — يجمع أشهر مزودي DNS ويختار الأسرع
+
+# ═══ المزودين ═══
+# الصيغة: "اسم|IP1|IP2|DoH_URL"
+PROVIDERS=(
+    "Cloudflare|1.1.1.1|1.0.0.1|https://cloudflare-dns.com/dns-query"
+    "Google|8.8.8.8|8.8.4.4|https://dns.google/dns-query"
+    "Quad9|9.9.9.9|149.112.112.112|https://dns.quad9.net/dns-query"
+    "AdGuard|94.140.14.14|94.140.15.15|https://dns.adguard-dns.com/dns-query"
+    "OpenDNS|208.67.222.222|208.67.220.220|https://doh.opendns.com/dns-query"
+    "DNS.SB|185.222.222.222|45.11.45.11|https://doh.dns.sb/dns-query"
+    "Mullvad|194.242.2.2|194.242.2.3|https://dns.mullvad.net/dns-query"
+    "Comodo|8.26.56.26|8.20.247.20|"
+    "Level3|4.2.2.1|4.2.2.2|"
+    "Yandex|77.88.8.8|77.88.8.1|https://common.dot.dns.yandex.net/dns-query"
+)
+
+CACHE_FILE="$HOME/dnsmasq/dns_providers_cache.json"
+RESULT_FILE="$HOME/dnsmasq/dns_winner.txt"
+
+# ═══ يختبر مزود واحد ═══
+test_provider() {
+    local name="$1"
+    local ip="$2"
+    local total=0
+    local ok=0
+
+    local t
+    for i in 1 2 3; do
+        local start=$(python3 -c "import time; print(time.time())")
+        nslookup -type=A google.com "$ip" >/dev/null 2>&1
+        local end=$(python3 -c "import time; print(time.time())")
+        t=$(python3 -c "print(f'{$end - $start:.2f}')" 2>/dev/null)
+        if [ -n "$t" ]; then
+            total=$(python3 -c "print($total + $t)" 2>/dev/null)
+            ok=$((ok + 1))
+        fi
+    done
+
+    if [ "$ok" -eq 0 ]; then
+        echo "999"
+        return
+    fi
+    python3 -c "print(f'{$total / $ok:.2f}')" 2>/dev/null || echo "$total"
+}
+
+# ═══ الأمر: test ═══
+cmd_test() {
+    echo "═══ اختبار مزودين DNS ═══"
+    echo ""
+
+    declare -A RESULTS
+    local best_name=""
+    local best_time=999
+
+    for entry in "${PROVIDERS[@]}"; do
+        IFS='|' read -r name ip1 ip2 doh <<< "$entry"
+        printf "  %-12s " "$name"
+        local t=$(test_provider "$name" "$ip1")
+
+        if [ "$t" = "999" ]; then
+            echo "✗ فشل"
+            continue
+        fi
+
+        RESULTS["$name"]="$t"
+        printf "%ss\n" "$t"
+
+        if python3 -c "exit(0 if $t < $best_time else 1)" 2>/dev/null; then
+            best_time="$t"
+            best_name="$name"
+        fi
+    done
+
+    echo ""
+    if [ -n "$best_name" ]; then
+        echo "═══════════════════════════════════════"
+        echo "  🏆 الأسرع: $best_name ($best_time s)"
+        echo "═══════════════════════════════════════"
+        echo "$best_name|$best_time" > "$RESULT_FILE"
+    else
+        echo "❌ مفيش مزود شغال"
+        return 1
+    fi
+}
+
+# ═══ الأمر: apply ═══
+cmd_apply() {
+    if [ ! -f "$RESULT_FILE" ]; then
+        echo "⚠️ اعمل test الأول"
+        exit 1
+    fi
+
+    local winner=$(cut -d'|' -f1 "$RESULT_FILE")
+    local winner_entry=""
+
+    for entry in "${PROVIDERS[@]}"; do
+        IFS='|' read -r name ip1 ip2 doh <<< "$entry"
+        if [ "$name" = "$winner" ]; then
+            winner_entry="$entry"
+            break
+        fi
+    done
+
+    if [ -z "$winner_entry" ]; then
+        echo "✗ مش لاقي المزود"
+        exit 1
+    fi
+
+    IFS='|' read -r name ip1 ip2 doh <<< "$winner_entry"
+
+    echo "═══ تطبيق $name ═══"
+    echo ""
+
+    # عدّل floxin_dns.py
+    local DNS_FILE="$HOME/dnsmasq/floxin_dns.py"
+    if [ ! -f "$DNS_FILE" ]; then
+        echo "✗ floxin_dns.py مش موجود"
+        exit 1
+    fi
+
+    # نسخة احتياطية
+    cp "$DNS_FILE" "$DNS_FILE.bak"
+
+    # استبدل قائمة UPSTREAM
+    python3 << PYEOF
+import re
+path = "$DNS_FILE"
+src = open(path).read()
+
+new_upstream = 'UPSTREAM = ["$ip1", "$ip2"]'
+src = re.sub(r'UPSTREAM = \[[^\]]*\]', new_upstream, src)
+open(path, 'w').write(src)
+print("✓ تم تحديث floxin_dns.py")
+PYEOF
+
+    echo ""
+    echo "🔄 إعادة تشغيل DNS..."
+    DNSF restart > /dev/null 2>&1
+    sleep 2
+    DNSF status
+}
+
+# ═══ الأمر: list ═══
+cmd_list() {
+    echo "═══ المزودين المتاحين ═══"
+    echo ""
+    printf "  %-12s %-18s %-30s\n" "الاسم" "IP الأساسي" "DoH"
+    printf "  %-12s %-18s %-30s\n" "────────────" "─────────────────" "──────────────────────────────"
+    for entry in "${PROVIDERS[@]}"; do
+        IFS='|' read -r name ip1 ip2 doh <<< "$entry"
+        printf "  %-12s %-18s %-30s\n" "$name" "$ip1" "${doh:0:30}"
+    done
+}
+
+# ═══ الأمر: auto (test + apply) ═══
+cmd_auto() {
+    cmd_test
+    echo ""
+    cmd_apply
+}
+
+# ═══ المساعدة ═══
+cmd_help() {
+    cat << EOF
+DNSWITCH — مدير مزودين DNS
+
+  DNSWITCH list    → عرض المزودين
+  DNSWITCH test    → اختبار السرعة
+  DNSWITCH apply   → تطبيق الأسرع
+  DNSWITCH auto    → test + apply تلقائي
+  DNSWITCH show    → عرض المزود الحالي
+  DNSWITCH help    → المساعدة
+EOF
+}
+
+cmd_show() {
+    if [ -f "$RESULT_FILE" ]; then
+        echo "🏆 المزود الحالي: $(cat $RESULT_FILE)"
+    else
+        echo "⚠️ مفيش مزود مختار — شغّل: DNSWITCH auto"
+    fi
+
+    if [ -f "$HOME/dnsmasq/floxin_dns.py" ]; then
+        echo ""
+        echo "📋 الإعداد الحالي:"
+        grep "^UPSTREAM" "$HOME/dnsmasq/floxin_dns.py"
+    fi
+}
+
+# ═══ Main ═══
+CMD="${1:-help}"
+case "$CMD" in
+    list)   cmd_list ;;
+    test)   cmd_test ;;
+    apply)  cmd_apply ;;
+    auto)   cmd_auto ;;
+    show)   cmd_show ;;
+    help|*) cmd_help ;;
+esac

@@ -1,0 +1,11 @@
+blocklist.txt
+extra_*.txt
+*.log
+*.bak
+*.pid
+*.lock
+.floxin_*
+queries.log
+__pycache__/
+.venv/
+.DS_Store

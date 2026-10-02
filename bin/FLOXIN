@@ -1,0 +1,1287 @@
+#!/usr/bin/env bash
+# FLOXIN — NET Shell
+FLOXIN_VERSION="1.1.0"
+
+CG='\033[32m'; CR='\033[31m'; CY='\033[33m'; CC='\033[36m'; CB='\033[34m'
+BOLD='\033[1m'; CZ='\033[0m'
+
+# Load all modules
+[ -f "$HOME/.floxin_environment" ] && source "$HOME/.floxin_environment"
+[ -f "$HOME/.floxin_net.sh" ] && source "$HOME/.floxin_net.sh"
+[ -f "$HOME/.floxin_codes.sh" ] && source "$HOME/.floxin_codes.sh"
+[ -f "$HOME/.floxin_scenarios.sh" ] && source "$HOME/.floxin_scenarios.sh"
+[ -f "$HOME/.floxin_simple.sh" ] && source "$HOME/.floxin_simple.sh"
+[ -f "$HOME/.floxin_short.sh" ] && source "$HOME/.floxin_short.sh"
+
+HISTORY_FILE="$HOME/dnsmasq/.floxin_history"
+
+DNS_DIR="$HOME/dnsmasq"
+DNS_SCRIPT="$DNS_DIR/floxin_dns.py"
+DNS_LOG="$DNS_DIR/dns.log"
+CONFIG="$DNS_DIR/.floxin_config"
+
+# ═══════════════════════════════════════════════════
+#  DNS Providers (name|primary|secondary|region)
+# ═══════════════════════════════════════════════════
+PROVIDERS=("${EXTENDED_PROVIDERS[@]}")
+
+# ─── Helpers ───
+dns_on()  { pgrep -f "floxin_dns.py" > /dev/null 2>&1; }
+dns_pid() { pgrep -f "floxin_dns.py" | head -1; }
+clr()     { clear 2>/dev/null || printf '\033[H\033[J'; }
+
+read_cfg() {
+    MODE="UNSET"; NET="UNSET"; SIM="0"; PROVIDER="UNSET"
+    if [ -f "$CONFIG" ]; then
+        MODE=$(grep '^MODE=' "$CONFIG" 2>/dev/null | cut -d= -f2)
+        NET=$(grep '^NETWORK=' "$CONFIG" 2>/dev/null | cut -d= -f2)
+        SIM=$(grep '^SIM=' "$CONFIG" 2>/dev/null | cut -d= -f2)
+        PROVIDER=$(grep '^PROVIDER=' "$CONFIG" 2>/dev/null | cut -d= -f2)
+    fi
+    MODE=${MODE:-UNSET}; NET=${NET:-UNSET}; SIM=${SIM:-0}; PROVIDER=${PROVIDER:-UNSET}
+}
+
+write_cfg() {
+    cat > "$CONFIG" << ENDCFG
+MODE=$1
+NETWORK=$2
+SIM=$3
+PROVIDER=$4
+SAVED_AT=$(date '+%Y-%m-%d %H:%M:%S')
+ENDCFG
+}
+
+# ─── Apply provider to floxin_dns.py ───
+apply_provider() {
+    local pname="$1"
+    local entry=""
+    for e in "${PROVIDERS[@]}"; do
+        local n=$(echo "$e" | cut -d'|' -f1)
+        [ "$n" = "$pname" ] && entry="$e" && break
+    done
+    [ -z "$entry" ] && { echo "Provider not found: $pname"; return 1; }
+
+    local ip1=$(echo "$entry" | cut -d'|' -f2)
+    local ip2=$(echo "$entry" | cut -d'|' -f3)
+
+    python3 - << PYEOF
+import re
+path = "$DNS_SCRIPT"
+src = open(path).read()
+new_up = 'UPSTREAM = ["$ip1", "$ip2"]'
+src = re.sub(r'UPSTREAM = \[[^\]]*\]', new_up, src)
+open(path, 'w').write(src)
+print("OK")
+PYEOF
+    echo -e "  ${CG}Provider: $pname ($ip1)${CZ}"
+}
+
+# ─── Apply mode (blocklist) ───
+apply_mode() {
+    case "$1" in
+        1)
+            [ -f "$DNS_DIR/blocklist.txt" ] && mv "$DNS_DIR/blocklist.txt" "$DNS_DIR/blocklist.txt.bak" 2>/dev/null
+            ;;
+        2|3)
+            [ -f "$DNS_DIR/blocklist.txt.bak" ] && [ ! -f "$DNS_DIR/blocklist.txt" ] && mv "$DNS_DIR/blocklist.txt.bak" "$DNS_DIR/blocklist.txt" 2>/dev/null
+            [ ! -f "$DNS_DIR/blocklist.txt" ] && curl -sS -L -o "$DNS_DIR/blocklist.txt" "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts" 2>/dev/null
+            ;;
+    esac
+}
+
+# ─── Start/Stop DNS ───
+stop_dns() {
+    pkill -9 -f "floxin_dns.py" 2>/dev/null
+    rm -f "$DNS_DIR/.dns.pid"
+    sleep 1
+}
+
+start_dns() {
+    cd "$DNS_DIR" || return 1
+    nohup python3 "$DNS_SCRIPT" > "$DNS_LOG" 2>&1 &
+    echo $! > "$DNS_DIR/.dns.pid"
+    disown
+    sleep 3
+    dns_on
+}
+
+# ═══════════════════════════════════════════════════
+#  Interface
+# ═══════════════════════════════════════════════════
+show_header() {
+    clr
+    echo -e "${CB}═══════════════════════════════════════════════${CZ}"
+    echo -e "${CB}              FLOXIN NET SHELL${CZ}"
+    echo -e "${CB}              $(date '+%Y-%m-%d %H:%M')${CZ}"
+    echo -e "${CB}═══════════════════════════════════════════════${CZ}"
+    echo ""
+}
+
+show_status_bar() {
+    read_cfg
+    local st on_off
+    if dns_on; then
+        st="${CG}RUNNING${CZ}"
+        on_off="ON "
+    else
+        st="${CR}STOPPED${CZ}"
+        on_off="OFF"
+    fi
+    echo -e "  ${BOLD}DNS:${CZ} $st  ${CC}|${CZ}  ${BOLD}Mode:${CZ} $MODE  ${CC}|${CZ}  ${BOLD}Net:${CZ} $NET  ${CC}|${CZ}  ${BOLD}Prov:${CZ} $PROVIDER"
+    echo -e "  ${CC}─────────────────────────────────────────────${CZ}"
+}
+
+# ─── Selection prompts ───
+select_mode() {
+    show_header
+    echo -e "  ${BOLD}Select mode:${CZ}"
+    echo ""
+    echo -e "    ${CG}[1]${CZ} BOOSTER      ${CY}fast, no block${CZ}"
+    echo -e "    ${CG}[2]${CZ} DATA SAVER   ${CY}ad block + trackers${CZ}"
+    echo -e "    ${CG}[3]${CZ} 2X1          ${CY}both, switchable${CZ}"
+    echo ""
+    read -p "  > " m
+    case "$m" in
+        1) echo "BOOSTER" ;;
+        2) echo "DATA_SAVER" ;;
+        3) echo "2X1" ;;
+        *) echo "" ;;
+    esac
+}
+
+select_net() {
+    show_header
+    echo -e "  ${BOLD}Select network:${CZ}"
+    echo ""
+    echo -e "    ${CG}[1]${CZ} WiFi"
+    echo -e "    ${CG}[2]${CZ} SIM"
+    echo -e "    ${CG}[3]${CZ} Both"
+    echo ""
+    read -p "  > " n
+    case "$n" in
+        1) echo "WIFI" ;;
+        2) echo "SIM" ;;
+        3) echo "BOTH" ;;
+        *) echo "" ;;
+    esac
+}
+
+select_provider() {
+    show_header
+    echo -e "  ${BOLD}Select DNS Provider:${CZ}"
+    echo ""
+    echo -e "    ${CC}── Egypt (fastest) ──${CZ}"
+    local i=1
+    declare -A IDX
+    for e in "${PROVIDERS[@]}"; do
+        local region=$(echo "$e" | cut -d'|' -f4)
+        local name=$(echo "$e" | cut -d'|' -f1)
+        local ip1=$(echo "$e" | cut -d'|' -f2)
+        [ "$region" = "EG" ] && { printf "    ${CG}[%2d]${CZ} %-22s %s\n" "$i" "$name" "$ip1"; IDX[$i]="$name"; }
+        i=$((i+1))
+    done
+    echo ""
+    echo -e "    ${CC}── Middle East ──${CZ}"
+    for e in "${PROVIDERS[@]}"; do
+        local region=$(echo "$e" | cut -d'|' -f4)
+        local name=$(echo "$e" | cut -d'|' -f1)
+        local ip1=$(echo "$e" | cut -d'|' -f2)
+        [ "$region" = "ME" ] && { printf "    ${CG}[%2d]${CZ} %-22s %s\n" "$i" "$name" "$ip1"; IDX[$i]="$name"; }
+        i=$((i+1))
+    done
+    echo ""
+    echo -e "    ${CC}── Global ──${CZ}"
+    for e in "${PROVIDERS[@]}"; do
+        local region=$(echo "$e" | cut -d'|' -f4)
+        local name=$(echo "$e" | cut -d'|' -f1)
+        local ip1=$(echo "$e" | cut -d'|' -f2)
+        [ "$region" = "GLOBAL" ] && { printf "    ${CG}[%2d]${CZ} %-22s %s\n" "$i" "$name" "$ip1"; IDX[$i]="$name"; }
+        i=$((i+1))
+    done
+    echo ""
+    echo -e "    ${CY}  [0] Cancel${CZ}"
+    echo ""
+    read -p "  > " p
+    [ "$p" = "0" ] && echo "" && return
+    echo "${IDX[$p]}"
+}
+
+# ═══════════════════════════════════════════════════
+#  Commands (inside shell)
+# ═══════════════════════════════════════════════════
+cmd_code() {
+    local code="$1"
+    if [ -z "$code" ]; then
+        list_codes
+        read -p "  Enter code (or Enter to cancel): " code
+        [ -z "$code" ] && return
+    fi
+    local result=$(redeem_code "$code")
+    if [ -z "$result" ]; then
+        show_header
+        echo -e "  ${CR}Invalid code: $code${CZ}"
+        echo -e "  ${CY}Try: codes${CZ}"
+        sleep 2
+        return
+    fi
+    local mode=$(echo "$result" | grep '^MODE=' | cut -d= -f2)
+    local prov=$(echo "$result" | grep '^PROVIDER=' | cut -d= -f2)
+    local net=$(echo "$result" | grep '^NET=' | cut -d= -f2)
+    local opts=$(echo "$result" | grep '^OPTS=' | cut -d= -f2)
+    local desc=$(echo "$result" | grep '^DESC=' | cut -d= -f2-)
+
+    show_header
+    echo -e "  ${CG}Code: $code${CZ}"
+    echo -e "  Mode:     ${CG}$mode${CZ}"
+    echo -e "  Provider: ${CG}$prov${CZ}"
+    [ "$net" != "AUTO" ] && echo -e "  Network:  ${CG}$net${CZ}"
+    [ -n "$opts" ] && echo -e "  Options:  ${CG}$opts${CZ}"
+    echo -e "  Info:     $desc"
+    echo ""
+    read_cfg
+    apply_provider "$prov"
+    apply_opts "$opts"
+    apply_mode $([ "$mode" = "BOOSTER" ] && echo 1 || echo 2)
+    local final_net="$NET"
+    [ "$net" != "AUTO" ] && final_net="$net"
+    write_cfg "$mode" "$final_net" "${SIM:-0}" "$prov"
+    stop_dns
+    if start_dns; then
+        echo -e "  ${CG}Applied & Running${CZ}"
+    else
+        echo -e "  ${CR}Failed${CZ}"
+    fi
+    echo "$code|$(date '+%Y-%m-%d %H:%M')" >> "$CODES_FILE" 2>/dev/null
+    echo "$code|$(date '+%Y-%m-%d %H:%M')" >> "$HISTORY_FILE" 2>/dev/null
+    sleep 3
+}
+
+cmd_geo() {
+    show_header
+    echo -e "  ${BOLD}Geo Detection${CZ}"
+    echo ""
+    echo -e "  ${CY}Detecting location...${CZ}"
+    if geo_detect; then
+        echo ""
+        echo -e "  Country:   ${CG}$GEO_COUNTRY${CZ} ($GEO_CODE)"
+        echo -e "  City:      ${CG}$GEO_CITY${CZ}"
+        echo -e "  ISP:       ${CG}$GEO_ISP${CZ}"
+        echo -e "  Public IP: ${CG}$GEO_IP${CZ}"
+        echo ""
+        read_cfg
+        local best=$(auto_pick_provider "$MODE")
+        local esc=$(auto_pick_escape)
+        echo -e "  ${CC}Auto-selected for your area:${CZ}"
+        echo -e "    Local:  ${CG}$best${CZ}"
+        echo -e "    Escape: ${CG}$esc${CZ}"
+        echo ""
+        echo -e "  ${CY}Apply local? [y/n]${CZ}"
+        read -p "  > " yn
+        if [ "$yn" = "y" ] || [ "$yn" = "Y" ]; then
+            apply_provider "$best"
+            write_cfg "$MODE" "$NET" "$SIM" "$best"
+            stop_dns
+            start_dns && echo -e "  ${CG}Applied${CZ}" || echo -e "  ${CR}Failed${CZ}"
+            sleep 2
+        fi
+    else
+        echo -e "  ${CR}Could not detect — no connection?${CZ}"
+        sleep 2
+    fi
+}
+
+cmd_codes() {
+    show_header
+    list_codes
+    read -p "  Press Enter..." _
+}
+
+cmd_auto() {
+    show_header
+    echo -e "  ${CY}Auto-detect + apply...${CZ}"
+    if geo_detect; then
+        read_cfg
+        local best=$(auto_pick_provider "$MODE")
+        echo ""
+        echo -e "  Detected: $GEO_COUNTRY ($GEO_CITY)"
+        echo -e "  Mode: $MODE"
+        echo -e "  Best provider: ${CG}$best${CZ}"
+        echo ""
+        apply_provider "$best"
+        write_cfg "$MODE" "$NET" "$SIM" "$best"
+        stop_dns
+        start_dns && echo -e "  ${CG}Applied${CZ}" || echo -e "  ${CR}Failed${CZ}"
+    else
+        echo -e "  ${CR}No connection${CZ}"
+    fi
+    sleep 3
+}
+
+cmd_run() {
+    local code="$1"
+    if [ -z "$code" ]; then
+        list_scenarios
+        read -p "  Enter scenario: " code
+        [ -z "$code" ] && return
+    fi
+    
+    # Check VPN conflict
+    if ifconfig 2>/dev/null | grep -qE "^(tun|ppp|wg)[0-9]"; then
+        local iface=$(ifconfig 2>/dev/null | grep -E "^(tun|ppp|wg)[0-9]" | head -1 | cut -d: -f1)
+        show_header
+        echo -e "  ${CY}═════════════════════════════════════════${CZ}"
+        echo -e "  ${CY}  VPN IS ACTIVE ($iface)${CZ}"
+        echo -e "  ${CY}═════════════════════════════════════════${CZ}"
+        echo ""
+        echo -e "  DNS can't run alongside VPN."
+        echo ""
+        echo -e "  ${CC}Choose:${CZ}"
+        echo -e "    ${CG}[1]${CZ} I closed the VPN - continue"
+        echo -e "    ${CG}[2]${CZ} Cancel (keep VPN)"
+        echo ""
+        read -p "  > " _ch
+        case "$_ch" in
+            1) echo -e "  ${CY}Continuing...${CZ}"; sleep 1 ;;
+            *) echo -e "  ${CY}Cancelled${CZ}"; sleep 1; return ;;
+        esac
+    fi
+
+    local result=$(redeem_scenario "$code")
+    if [ -z "$result" ]; then
+        show_header
+        echo -e "  ${CR}Invalid scenario: $code${CZ}"
+        echo -e "  ${CY}Try: scenarios${CZ}"
+        sleep 2
+        return
+    fi
+    local type=$(echo "$result" | grep '^TYPE=' | cut -d= -f2)
+    local prov=$(echo "$result" | grep '^PROVIDER=' | cut -d= -f2)
+    local net=$(echo "$result" | grep '^NET=' | cut -d= -f2)
+    local vpn=$(echo "$result" | grep '^VPN=' | cut -d= -f2)
+    local opts=$(echo "$result" | grep '^OPTS=' | cut -d= -f2)
+    local desc=$(echo "$result" | grep '^DESC=' | cut -d= -f2-)
+    show_header
+    echo -e "  ${CC}Scenario: $code${CZ}"
+    echo -e "  Type:     ${CG}$type${CZ}"
+    echo -e "  Provider: ${CG}$prov${CZ}"
+    echo -e "  Network:  ${CG}$net${CZ}"
+    echo -e "  VPN:      ${CG}$vpn${CZ}"
+    [ -n "$opts" ] && echo -e "  Options:  ${CG}$opts${CZ}"
+    echo -e "  Info:     $desc"
+    echo ""
+    read_cfg
+    local final_net="$NET"
+    [ "$net" != "AUTO" ] && final_net="$net"
+    case "$type" in
+        VPN)
+            echo -e "  ${CY}[1/2] Stopping DNS...${CZ}"
+            stop_dns
+            write_cfg "VPN_ONLY" "$final_net" "${SIM:-0}" "NONE"
+            echo -e "  ${CY}[2/2] Launching VPN...${CZ}"
+            case "$vpn" in
+                WARP)     launch_warp ;;
+                PSIPHON)  launch_psiphon ;;
+                AUTO)     launch_warp || launch_psiphon ;;
+            esac
+            ;;
+        ALL)
+            [ "$prov" != "AUTO" ] && apply_provider "$prov"
+            apply_opts "$opts"
+            apply_mode 2
+            write_cfg "DATA_SAVER" "$final_net" "${SIM:-0}" "$prov"
+            stop_dns
+            start_dns && echo -e "  ${CG}DNS running${CZ}" || echo -e "  ${CR}DNS failed${CZ}"
+            echo -e "  ${CY}Launching VPN...${CZ}"
+            case "$vpn" in
+                WARP)     launch_warp ;;
+                PSIPHON)  launch_psiphon ;;
+            esac
+            ;;
+        SMART)
+            cmd_auto
+            ;;
+        BOOST)
+            if [ "$prov" != "AUTO" ]; then apply_provider "$prov"; else apply_provider "$(auto_pick_provider BOOSTER)"; fi
+            apply_opts "$opts"
+            apply_mode 1
+            write_cfg "BOOSTER" "$final_net" "${SIM:-0}" "$prov"
+            stop_dns
+            start_dns && echo -e "  ${CG}Applied (Booster)${CZ}" || echo -e "  ${CR}Failed${CZ}"
+            ;;
+        SAVE|BLOCK|HIDE)
+            if [ "$prov" != "AUTO" ]; then apply_provider "$prov"; else apply_provider "$(auto_pick_provider DATA_SAVER)"; fi
+            apply_opts "$opts"
+            apply_mode 2
+            write_cfg "DATA_SAVER" "$final_net" "${SIM:-0}" "$prov"
+            stop_dns
+            start_dns && echo -e "  ${CG}Applied (Data Saver)${CZ}" || echo -e "  ${CR}Failed${CZ}"
+            ;;
+    esac
+    echo "$code|$(date '+%Y-%m-%d %H:%M')" >> "$CODES_FILE" 2>/dev/null
+    echo "$code|$(date '+%Y-%m-%d %H:%M')" >> "$HISTORY_FILE" 2>/dev/null
+    sleep 3
+}
+
+cmd_scenarios() {
+    show_header
+    list_scenarios
+    read -p "  Press Enter..." _
+}
+
+cmd_apply_alias() {
+    local alias="$1"
+    # Try short code first
+    local real=$(resolve_short "$alias" 2>/dev/null)
+    if [ -z "$real" ]; then
+        real=$(resolve_alias "$alias")
+    fi
+    [ -z "$real" ] && return 1
+    echo -e "  ${CC}→ $alias${CZ}"
+    cmd_run "$real"
+    return 0
+}
+
+cmd_short() {
+    show_header
+    list_short
+    read -p "  Press Enter..." _
+}
+
+cmd_reset() {
+    show_header
+    echo -e "  ${CY}Resetting FLOXIN...${CZ}"
+    stop_dns
+    echo -e "  ${CG}✓${CZ} DNS stopped"
+    [ -f "$DNS_DIR/blocklist.txt.bak" ] && [ ! -f "$DNS_DIR/blocklist.txt" ] && mv "$DNS_DIR/blocklist.txt.bak" "$DNS_DIR/blocklist.txt" 2>/dev/null
+    rm -f "$CONFIG" "$CODES_FILE" "$GEO_CACHE" "$HISTORY_FILE" 2>/dev/null
+    if [ -f "$DNS_SCRIPT" ]; then
+        python3 -c "
+import re
+p = '$DNS_SCRIPT'
+s = open(p).read()
+s = re.sub(r'UPSTREAM = \[[^\]]*\]', 'UPSTREAM = [\"1.1.1.1\", \"1.0.0.1\"]', s)
+s = re.sub(r'CACHE_TTL = .*', 'CACHE_TTL = 600', s)
+open(p, 'w').write(s)
+" 2>/dev/null
+    fi
+    echo -e "  ${CG}✓${CZ} Reset complete"
+    sleep 3
+}
+
+cmd_history() {
+    show_header
+    echo -e "  ${BOLD}Recent Activity${CZ}"
+    echo ""
+    if [ -f "$HISTORY_FILE" ]; then
+        local total=$(wc -l < "$HISTORY_FILE")
+        echo -e "  ${CC}Total: $total${CZ}"
+        echo ""
+        tail -20 "$HISTORY_FILE" | while IFS='|' read -r h_code h_time; do
+            printf "  ${CG}%-20s${CZ} ${CY}%s${CZ}\n" "$h_code" "$h_time"
+        done
+    else
+        echo -e "  ${CY}No history${CZ}"
+    fi
+    echo ""
+    read -p "  Press Enter..." _
+}
+
+cmd_quick() {
+    show_header
+    list_simple
+    echo ""
+    read -p "  Type command(s): " q_input
+    [ -z "$q_input" ] && return
+    for word in $q_input; do
+        local upper=$(echo "$word" | tr '[:lower:]' '[:upper:]')
+        case "$upper" in
+            RESET) cmd_reset ;;
+            CHECK) bash "$HOME/bin/CHECK" 2>/dev/null ;;
+            STOP)  cmd_stop ;;
+            STATUS) cmd_status ;;
+            LOG)   cmd_history ;;
+            *)
+                local real=$(resolve_alias "$upper")
+                [ -n "$real" ] && cmd_apply_alias "$upper"
+                ;;
+        esac
+    done
+}
+
+cmd_dv() {
+    shopt -s nocasematch
+    clr
+    echo -e "${CR}=========================================${CZ}"
+    echo -e "${CR}     FLOXIN DV - Emergency Mode${CZ}"
+    echo -e "${CR}     $(date '+%Y-%m-%d %H:%M:%S')${CZ}"
+    echo -e "${CR}=========================================${CZ}"
+    echo ""
+    echo -e "  ${CY}[1/4] Stopping all DNS services...${CZ}"
+    pkill -9 -f "floxin_dns.py" 2>/dev/null
+    pkill -9 -f "throttle_proxy.py" 2>/dev/null
+    rm -f "$DNS_DIR/.dns.pid" 2>/dev/null
+    echo -e "  ${CG}OK${CZ} DNS stopped"
+    echo ""
+    echo -e "  ${CY}[2/4] Checking VPN...${CZ}"
+    sleep 1
+    if ifconfig 2>/dev/null | grep -qE "^(tun|ppp|wg)[0-9]"; then
+        local iface=$(ifconfig 2>/dev/null | grep -E "^(tun|ppp|wg)[0-9]" | head -1 | cut -d: -f1)
+        echo -e "  ${CY}!${CZ} VPN active: ${CG}$iface${CZ}"
+        echo -e "  ${CC}  Close WARP/Psiphon from your phone${CZ}"
+    else
+        echo -e "  ${CG}OK${CZ} No VPN active"
+    fi
+    echo ""
+    echo -e "  ${CY}[3/4] Restart network hint:${CZ}"
+    echo -e "  ${CC}  Toggle Airplane Mode ON then OFF${CZ}"
+    echo -e "  ${CC}  Or forget + rejoin WiFi${CZ}"
+    echo ""
+    echo -e "  ${CY}[4/4] Choose mode:${CZ}"
+    echo ""
+    echo -e "    ${CG}[1]${CZ} Speed Assistant   ${CY}fast internet${CZ}"
+    echo -e "    ${CG}[2]${CZ} Data Saver        ${CY}save data + block${CZ}"
+    echo -e "    ${CG}[3]${CZ} Both (2X1)        ${CY}switchable${CZ}"
+    echo -e "    ${CG}[4]${CZ} Advanced Tools    ${CY}throttle tests${CZ}"
+    echo -e "    ${CR}[0]${CZ} Cancel"
+    echo ""
+    read -p "  > " _dv_choice
+
+    case "$_dv_choice" in
+        1) cmd_run "FAST" ;;
+        2) cmd_run "SAVE" ;;
+        3) cmd_run "ALL" ;;
+        4) cmd_throttle_menu ;;
+        *) echo -e "  ${CY}Cancelled${CZ}"; sleep 1 ;;
+    esac
+    shopt -u nocasematch
+}
+
+cmd_throttle_menu() {
+    while true; do
+        clr
+        echo -e "${CB}=========================================${CZ}"
+        echo -e "${CB}          Advanced Tools${CZ}"
+        echo -e "${CB}=========================================${CZ}"
+        echo ""
+        echo -e "  ${CG}[1]${CZ} Throttle Sim test"
+        echo -e "  ${CG}[2]${CZ} Start Throttle Sim"
+        echo -e "  ${CG}[3]${CZ} Stop Throttle Sim"
+        echo -e "  ${CG}[4]${CZ} WEHACK - port scan"
+        echo -e "  ${CG}[5]${CZ} DNSWITCH - auto best DNS"
+        echo -e "  ${CG}[6]${CZ} SAFE_MODE - prepare"
+        echo -e "  ${CG}[7]${CZ} PANIC - emergency"
+        echo -e "  ${CR}[0]${CZ} Back"
+        echo ""
+        read -p "  > " _adv
+        case "$_adv" in
+            1) bash "$HOME/bin/THROTTLE_SIM" test ;;
+            2) bash "$HOME/bin/THROTTLE_SIM" start ;;
+            3) bash "$HOME/bin/THROTTLE_SIM" stop ;;
+            4) bash "$HOME/bin/WEHACK" all ;;
+            5) bash "$HOME/bin/DNSWITCH" auto ;;
+            6) bash "$HOME/bin/SAFE_MODE" ;;
+            7) bash "$HOME/bin/PANIC" ;;
+            0|"") return ;;
+        esac
+        echo ""
+        read -p "  Press Enter..." _
+    done
+}
+
+cmd_export() {
+    local ts=$(date '+%Y%m%d_%H%M%S')
+    local file="$HOME/floxin_backup_$ts.tar.gz"
+    echo -e "  ${CY}Exporting...${CZ}"
+    local tmp=$(mktemp -d)
+    [ -f "$CONFIG" ] && cp "$CONFIG" "$tmp/"
+    [ -f "$CODES_FILE" ] && cp "$CODES_FILE" "$tmp/"
+    [ -f "$DNS_SCRIPT" ] && cp "$DNS_SCRIPT" "$tmp/"
+    [ -f "$HOME/.floxin_codes.sh" ] && cp "$HOME/.floxin_codes.sh" "$tmp/"
+    [ -f "$HOME/.floxin_scenarios.sh" ] && cp "$HOME/.floxin_scenarios.sh" "$tmp/"
+    [ -f "$HOME/.floxin_simple.sh" ] && cp "$HOME/.floxin_simple.sh" "$tmp/"
+    [ -f "$HOME/.floxin_short.sh" ] && cp "$HOME/.floxin_short.sh" "$tmp/"
+    cat > "$tmp/META.txt" << ENDM
+FLOXIN NET Backup
+Version: 1.0.0
+Date: $(date '+%Y-%m-%d %H:%M:%S')
+ENDM
+    tar -czf "$file" -C "$tmp" . 2>/dev/null
+    rm -rf "$tmp"
+    if [ -f "$file" ]; then
+        local size=$(du -h "$file" | cut -f1)
+        echo -e "  ${CG}OK${CZ} Exported: $file ($size)"
+    else
+        echo -e "  ${CR}FAIL${CZ}"
+    fi
+    echo ""
+    read -p "  Press Enter..." _
+}
+
+cmd_bg() {
+    if dns_on; then
+        echo -e "  ${CG}DNS already running${CZ} (PID: $(dns_pid))"
+        return 0
+    fi
+    if [ ! -f "$DNS_SCRIPT" ]; then
+        echo -e "  ${CR}floxin_dns.py not found${CZ}"
+        return 1
+    fi
+    cd "$DNS_DIR" || return 1
+    nohup python3 "$DNS_SCRIPT" > "$DNS_LOG" 2>&1 &
+    echo $! > "$DNS_DIR/.dns.pid"
+    disown
+    sleep 3
+    if dns_on; then
+        echo -e "  ${CG}DNS started in background${CZ} (PID: $(dns_pid))"
+        echo -e "  ${CC}Listening on ${FLOXIN_BIND_ADDRESS:-127.0.0.1}:${FLOXIN_PORT:-5353}${CZ}"
+        return 0
+    else
+        echo -e "  ${CR}DNS failed to start${CZ}"
+        tail -5 "$DNS_LOG" 2>/dev/null
+        return 1
+    fi
+}
+
+cmd_doctor() {
+    local FIX="${1:-auto}"
+    clr
+    echo -e "${CB}=========================================${CZ}"
+    echo -e "${CB}  FLOXIN DOCTOR${CZ}"
+    echo -e "${CB}  Auto-diagnosis + repair${CZ}"
+    echo -e "${CB}=========================================${CZ}"
+    echo ""
+
+    local ISSUES=0
+    local FIXED=0
+
+    # ─── 1) Python ───
+    echo -e "${CC}[1/8] Python check${CZ}"
+    if command -v python3 >/dev/null 2>&1; then
+        local pyv=$(python3 --version 2>&1 | cut -d' ' -f2)
+        echo -e "  ${CG}OK${CZ} python3 $pyv"
+    else
+        echo -e "  ${CR}FAIL${CZ} python3 missing"
+        ISSUES=$((ISSUES+1))
+        if [ "$FIX" = "auto" ]; then
+            echo -e "  ${CY}→ Installing python...${CZ}"
+            pkg install python -y >/dev/null 2>&1 && { FIXED=$((FIXED+1)); echo -e "  ${CG}FIXED${CZ}"; }
+        fi
+    fi
+    echo ""
+
+    # ─── 2) dnslib ───
+    echo -e "${CC}[2/8] dnslib check${CZ}"
+    if python3 -c "import dnslib" 2>/dev/null; then
+        echo -e "  ${CG}OK${CZ} dnslib"
+    else
+        echo -e "  ${CR}FAIL${CZ} dnslib missing"
+        ISSUES=$((ISSUES+1))
+        if [ "$FIX" = "auto" ]; then
+            echo -e "  ${CY}→ Installing dnslib...${CZ}"
+            pip install dnslib >/dev/null 2>&1 && { FIXED=$((FIXED+1)); echo -e "  ${CG}FIXED${CZ}"; }
+        fi
+    fi
+    echo ""
+
+    # ─── 3) dig ───
+    echo -e "${CC}[3/8] dig check${CZ}"
+    if command -v dig >/dev/null 2>&1; then
+        echo -e "  ${CG}OK${CZ} dig"
+    else
+        echo -e "  ${CR}FAIL${CZ} dig missing"
+        ISSUES=$((ISSUES+1))
+        if [ "$FIX" = "auto" ]; then
+            pkg install dnsutils -y >/dev/null 2>&1 && { FIXED=$((FIXED+1)); echo -e "  ${CG}FIXED${CZ}"; }
+        fi
+    fi
+    echo ""
+
+    # ─── 4) ifconfig ───
+    echo -e "${CC}[4/8] ifconfig check${CZ}"
+    if command -v ifconfig >/dev/null 2>&1; then
+        echo -e "  ${CG}OK${CZ} ifconfig"
+    else
+        echo -e "  ${CR}FAIL${CZ} ifconfig missing"
+        ISSUES=$((ISSUES+1))
+        if [ "$FIX" = "auto" ]; then
+            pkg install net-tools -y >/dev/null 2>&1 && { FIXED=$((FIXED+1)); echo -e "  ${CG}FIXED${CZ}"; }
+        fi
+    fi
+    echo ""
+
+    # ─── 5) DNS script ───
+    echo -e "${CC}[5/8] floxin_dns.py${CZ}"
+    if [ -f "$DNS_SCRIPT" ]; then
+        if python3 -c "import ast; ast.parse(open('$DNS_SCRIPT').read())" 2>/dev/null; then
+            echo -e "  ${CG}OK${CZ} floxin_dns.py (valid syntax)"
+        else
+            echo -e "  ${CR}FAIL${CZ} floxin_dns.py has syntax errors"
+            ISSUES=$((ISSUES+1))
+        fi
+    else
+        echo -e "  ${CR}FAIL${CZ} floxin_dns.py missing"
+        ISSUES=$((ISSUES+1))
+    fi
+    echo ""
+
+    # ─── 6) Blocklist ───
+    echo -e "${CC}[6/8] Blocklist${CZ}"
+    if [ -f "$DNS_DIR/blocklist.txt" ]; then
+        local cnt=$(wc -l < "$DNS_DIR/blocklist.txt")
+        if [ "$cnt" -gt 10000 ]; then
+            echo -e "  ${CG}OK${CZ} $cnt domains"
+        else
+            echo -e "  ${CY}WARN${CZ} only $cnt domains"
+            ISSUES=$((ISSUES+1))
+            if [ "$FIX" = "auto" ]; then
+                echo -e "  ${CY}→ Re-downloading...${CZ}"
+                curl -sS -L -o "$DNS_DIR/blocklist.txt" "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts" 2>/dev/null
+                [ $? -eq 0 ] && { FIXED=$((FIXED+1)); echo -e "  ${CG}FIXED${CZ}"; }
+            fi
+        fi
+    else
+        echo -e "  ${CR}FAIL${CZ} blocklist missing"
+        ISSUES=$((ISSUES+1))
+        if [ "$FIX" = "auto" ]; then
+            echo -e "  ${CY}→ Downloading...${CZ}"
+            curl -sS -L -o "$DNS_DIR/blocklist.txt" "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts" 2>/dev/null
+            [ $? -eq 0 ] && { FIXED=$((FIXED+1)); echo -e "  ${CG}FIXED${CZ}"; }
+        fi
+    fi
+    echo ""
+
+    # ─── 7) Network ───
+    echo -e "${CC}[7/8] Network${CZ}"
+    local ip=$(ifconfig 2>/dev/null | grep "inet " | grep -v 127.0.0.1 | awk '{print $2}' | head -1)
+    if [ -n "$ip" ]; then
+        echo -e "  ${CG}OK${CZ} Local IP: $ip"
+        local gw=$(echo "$ip" | cut -d. -f1-3)
+        echo -e "  ${CC}INFO${CZ} Router: ${gw}.1"
+    else
+        echo -e "  ${CY}WARN${CZ} No network"
+        ISSUES=$((ISSUES+1))
+    fi
+    echo ""
+
+    # ─── 8) Termux API (optional) ───
+    echo -e "${CC}[8/8] Termux API (optional)${CZ}"
+    if command -v termux-open >/dev/null 2>&1; then
+        echo -e "  ${CG}OK${CZ} termux-api installed"
+    else
+        echo -e "  ${CC}INFO${CZ} Not installed — optional for VPN launch"
+    fi
+    echo ""
+
+    # ─── Summary ───
+    echo -e "${CB}=========================================${CZ}"
+    echo -e "  Issues:  $ISSUES"
+    echo -e "  Fixed:   $FIXED"
+    echo ""
+    if [ $ISSUES -eq 0 ]; then
+        echo -e "  ${CG}SYSTEM HEALTHY${CZ}"
+    elif [ "$FIX" = "auto" ] && [ $FIXED -eq $ISSUES ]; then
+        echo -e "  ${CG}ALL ISSUES FIXED${CZ}"
+    elif [ "$FIX" = "auto" ]; then
+        echo -e "  ${CY}$((ISSUES - FIXED)) issue(s) remain${CZ}"
+        echo -e "  Run: ${CG}FLOXIN doctor${CZ} again"
+    else
+        echo -e "  ${CY}Run: ${CG}FLOXIN doctor${CZ} to auto-fix"
+    fi
+    echo -e "${CB}=========================================${CZ}"
+    echo ""
+    read -p "  Press Enter..." _
+}
+
+cmd_env() {
+    clr
+    echo -e "${CB}=========================================${CZ}"
+    echo -e "${CB}  FLOXIN ENVIRONMENT${CZ}"
+    echo -e "${CB}=========================================${CZ}"
+    echo ""
+
+    # ─── Device ───
+    echo -e "${CC}Device${CZ}"
+    echo -e "  Model:     ${CG}$(getprop ro.product.model 2>/dev/null || echo unknown)${CZ}"
+    echo -e "  Android:   ${CG}$(getprop ro.build.version.release 2>/dev/null || echo unknown)${CZ}"
+    echo -e "  Kernel:    ${CG}$(uname -r)${CZ}"
+    echo -e "  Arch:      ${CG}$(uname -m)${CZ}"
+    echo ""
+
+    # ─── Termux ───
+    echo -e "${CC}Termux${CZ}"
+    local pkg_v=$(pkg list-installed 2>/dev/null | grep "^termux-tools/" | awk '{print $2}' | head -1)
+    echo -e "  Termux:    ${CG}${pkg_v:-unknown}${CZ}"
+    echo -e "  Home:      ${CG}$HOME${CZ}"
+    echo -e "  PREFIX:    ${CG}$PREFIX${CZ}"
+    echo ""
+
+    # ─── Editor ───
+    echo -e "${CC}Editor${CZ}"
+    local edit="${EDITOR:-${VISUAL:-not set}}"
+    echo -e "  \$EDITOR:   ${CG}$edit${CZ}"
+    local nano_exists=$(command -v nano >/dev/null 2>&1 && echo yes || echo no)
+    local vim_exists=$(command -v vim >/dev/null 2>&1 && echo yes || echo no)
+    echo -e "  nano:      ${CG}$nano_exists${CZ}"
+    echo -e "  vim:       ${CG}$vim_exists${CZ}"
+    echo ""
+
+    # ─── Network ───
+    echo -e "${CC}Network${CZ}"
+    local ip=$(ifconfig 2>/dev/null | grep "inet " | grep -v 127.0.0.1 | awk '{print $2}' | head -1)
+    [ -n "$ip" ] && echo -e "  Local IP:  ${CG}$ip${CZ}"
+    local wifi=$(termux-wifi-connectioninfo 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('ssid','unknown'))" 2>/dev/null)
+    [ -n "$wifi" ] && [ "$wifi" != "unknown" ] && echo -e "  SSID:      ${CG}$wifi${CZ}"
+    local vpn=$(ifconfig 2>/dev/null | grep -E "^(tun|ppp|wg)[0-9]" | head -1 | cut -d: -f1)
+    [ -n "$vpn" ] && echo -e "  VPN:       ${CY}$vpn${CZ}" || echo -e "  VPN:       ${CG}off${CZ}"
+    echo ""
+
+    # ─── External IP ───
+    echo -e "${CC}External${CZ}"
+    local ext_ip=$(curl -s -m 4 "https://api.ipify.org" 2>/dev/null)
+    [ -n "$ext_ip" ] && echo -e "  Public IP: ${CG}$ext_ip${CZ}"
+    local geo=$(curl -s -m 4 "http://ip-api.com/json/?fields=country,city,isp" 2>/dev/null)
+    if [ -n "$geo" ]; then
+        local country=$(echo "$geo" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('country','?'))" 2>/dev/null)
+        local city=$(echo "$geo" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('city','?'))" 2>/dev/null)
+        local isp=$(echo "$geo" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('isp','?'))" 2>/dev/null)
+        echo -e "  Country:   ${CG}$country${CZ}"
+        echo -e "  City:      ${CG}$city${CZ}"
+        echo -e "  ISP:       ${CG}$isp${CZ}"
+    fi
+    echo ""
+
+    # ─── FLOXIN ───
+    echo -e "${CC}FLOXIN${CZ}"
+    echo -e "  Version:   ${CG}$FLOXIN_VERSION${CZ}"
+    if dns_on; then
+        echo -e "  DNS:       ${CG}RUNNING${CZ} (PID: $(dns_pid))"
+    else
+        echo -e "  DNS:       ${CR}STOPPED${CZ}"
+    fi
+    echo -e "  Scripts:   ${CG}$(ls ~/bin/ 2>/dev/null | wc -l) files${CZ}"
+    echo -e "  Blocklist: ${CG}$(wc -l < ~/dnsmasq/blocklist.txt 2>/dev/null || echo 0) domains${CZ}"
+    echo ""
+
+    # ─── Recommendations ───
+    echo -e "${CC}Recommendations${CZ}"
+    if [ -z "$edit" ] || [ "$edit" = "not set" ]; then
+        echo -e "  ${CY}→ Set \$EDITOR: export EDITOR=nano${CZ}"
+    fi
+    if ! command -v termux-open >/dev/null 2>&1; then
+        echo -e "  ${CY}→ Install Termux:API for VPN launch${CZ}"
+    fi
+    if [ -n "$vpn" ]; then
+        echo -e "  ${CY}→ VPN active — DNS may not work${CZ}"
+    fi
+    if [ -n "$ext_ip" ] && [ -n "$geo" ]; then
+        local c=$(echo "$geo" | python3 -c "import sys,json; print(json.load(sys.stdin).get('country',''))" 2>/dev/null)
+        case "$c" in
+            Egypt)     echo -e "  ${CG}→ Egypt detected — use: FAST or SAVE${CZ}" ;;
+            *)         echo -e "  ${CC}→ Try: FLOXIN geo (auto-select provider)${CZ}" ;;
+        esac
+    fi
+    echo ""
+    read -p "  Press Enter..." _
+}
+
+cmd_help() {
+    read_cfg
+    local status_txt mode_txt
+    if dns_on; then
+        status_txt="${CG}RUNNING${CZ}"
+    else
+        status_txt="${CR}STOPPED${CZ}"
+    fi
+    [ -z "$MODE" ] || [ "$MODE" = "UNSET" ] && mode_txt="${CY}not set${CZ}" || mode_txt="${CG}$MODE${CZ}"
+
+    clr
+    echo -e "${CB}═══════════════════════════════════════════════${CZ}"
+    echo -e "${CB}              FLOXIN NET - HELP${CZ}"
+    echo -e "${CB}═══════════════════════════════════════════════${CZ}"
+    echo ""
+    echo -e "  ${CC}Status:${CZ}   $status_txt"
+    echo -e "  ${CC}Mode:${CZ}     $mode_txt"
+    echo -e "  ${CC}Network:${CZ}  $NET"
+    echo -e "  ${CC}Provider:${CZ} $PROVIDER"
+    echo ""
+    echo -e "${CG}═══════ QUICK START (for beginners) ═══════${CZ}"
+    echo -e "  ${CY}Just type the WORD — that's it${CZ}"
+    echo ""
+    echo -e "  ${CG}FAST${CZ}         Fastest internet"
+    echo -e "  ${CG}SAVE${CZ}         Save data (ad block)"
+    echo -e "  ${CG}SAVE-WIFI${CZ}    Save data on WiFi"
+    echo -e "  ${CG}SAVE-SIM${CZ}     Save data on SIM"
+    echo -e "  ${CG}HIDE${CZ}         Hide from ISP (privacy)"
+    echo -e "  ${CG}VPN${CZ}          Use WARP VPN"
+    echo -e "  ${CG}ALL${CZ}          Everything at once"
+    echo -e "  ${CG}ALMOST-OUT${CZ}   Network almost out"
+    echo -e "  ${CG}CHECK${CZ}        Check connection"
+    echo -e "  ${CG}RESET${CZ}        Back to defaults"
+    echo ""
+    echo -e "  ${CY}Chain:${CZ} ${CG}FAST SAVE VPN${CZ}  (multiple at once)"
+    echo -e "  ${CY}All:${CZ}   ${CG}quick${CZ}  (interactive menu)"
+    echo ""
+    echo -e "${CC}═══════ CORE ═══════${CZ}"
+    echo -e "  ${CG}help${CZ}            This menu"
+    echo -e "  ${CG}status${CZ}          Show detailed status"
+    echo -e "  ${CG}clear${CZ}           Clear screen"
+    echo -e "  ${CG}exit${CZ}            Exit shell"
+    echo ""
+    echo -e "${CC}═══════ CONFIGURATION ═══════${CZ}"
+    echo -e "  ${CG}mode${CZ}            Change mode (Booster / Saver / 2X1)"
+    echo -e "  ${CG}net${CZ}             Change network (WiFi / SIM / Both)"
+    echo -e "  ${CG}provider${CZ}        Select DNS provider (interactive)"
+    echo -e "  ${CG}providers${CZ}       List all available providers"
+    echo -e "  ${CG}edit${CZ}            Full config editor"
+    echo ""
+    echo -e "${CC}═══════ CONTROL ═══════${CZ}"
+    echo -e "  ${CG}start${CZ}           Start DNS server"
+    echo -e "  ${CG}stop${CZ}            Stop DNS server"
+    echo -e "  ${CG}restart${CZ}         Restart DNS"
+    echo ""
+    echo -e "${CC}═══════ CODES (100+) ═══════${CZ}"
+    echo -e "  ${CG}codes${CZ}           List all activation codes"
+    echo -e "  ${CG}code <CODE>${CZ}     Apply a code"
+    echo -e "  ${CY}Direct: FLOX-EG-SAVE (type code directly)${CZ}"
+    echo ""
+    echo -e "${CC}═══════ SCENARIOS (40) ═══════${CZ}"
+    echo -e "  ${CG}scenarios${CZ}       List all scenarios"
+    echo -e "  ${CG}run <CODE>${CZ}      Apply a scenario"
+    echo -e "  ${CG}sc <CODE>${CZ}       Shortcut for 'run'"
+    echo -e "  ${CY}Direct: SAVE-EG, VPN-WARP, ALL-MAX${CZ}"
+    echo ""
+    echo -e "${CC}═══════ AUTO ═══════${CZ}"
+    echo -e "  ${CG}geo${CZ}             Detect location + suggest provider"
+    echo -e "  ${CG}auto${CZ}            Auto-select everything"
+    echo ""
+    echo -e "${CC}═══════ VPN ═══════${CZ}"
+    echo -e "  ${CG}warp${CZ}            Launch Cloudflare WARP"
+    echo -e "  ${CG}psiphon${CZ}         Launch Psiphon"
+    echo -e "  ${CY}Note: VPN and DNS do not run together${CZ}"
+    echo ""
+    echo -e "${CC}═══════ TOOLS ═══════${CZ}"
+    echo -e "  ${CG}test${CZ}            Full system check (23 points)"
+    echo -e "  ${CG}sousg${CZ}           Live DNS activity monitor"
+    echo -e "  ${CG}netstate${CZ}        Quick ON/OFF status"
+    echo -e "  ${CG}panic${CZ}           Emergency stop"
+    echo -e "  ${CG}reload${CZ}          Reload codes/scenarios files"
+    echo ""
+
+    # Mode-specific quick tips
+    case "$MODE" in
+        BOOSTER)
+            echo -e "${CC}═══════ BOOSTER QUICK TIPS ═══════${CZ}"
+            echo -e "  ${CY}Ad block is OFF — speed priority${CZ}"
+            echo -e "  Try: ${CG}code FLOX-EG${CZ}      (Egypt fast)"
+            echo -e "  Try: ${CG}run BOOST-EG${CZ}      (Booster scenario)"
+            ;;
+        DATA_SAVER)
+            echo -e "${CC}═══════ DATA SAVER QUICK TIPS ═══════${CZ}"
+            echo -e "  ${CY}Ad block is ON — saving data${CZ}"
+            echo -e "  Try: ${CG}code FLOX-EG-SAVE${CZ} (Egypt + block)"
+            echo -e "  Try: ${CG}run SAVE-MAX${CZ}      (Strict block)"
+            echo -e "  Check: ${CG}sousg${CZ}          (see blocked queries)"
+            ;;
+        2X1)
+            echo -e "${CC}═══════ 2X1 QUICK TIPS ═══════${CZ}"
+            echo -e "  ${CY}Both modes available — switch anytime${CZ}"
+            echo -e "  Switch: ${CG}mode${CZ}  (choose new mode)"
+            ;;
+    esac
+    echo ""
+    echo -e "${CB}═══════════════════════════════════════════════${CZ}"
+    echo -e "  ${CC}New here?${CZ} Try: ${CG}geo${CZ} ${CC}then${CZ} ${CG}auto${CZ}"
+    echo -e "${CB}═══════════════════════════════════════════════${CZ}"
+}
+
+cmd_providers() {
+    show_header
+    echo -e "  ${BOLD}All DNS Providers:${CZ}"
+    echo ""
+    echo -e "  ${CC}Region  Name                  Primary          Secondary${CZ}"
+    echo -e "  ${CC}────────────────────────────────────────────────────────${CZ}"
+    for e in "${PROVIDERS[@]}"; do
+        IFS='|' read -r name ip1 ip2 region <<< "$e"
+        printf "  %-7s %-20s %-16s %s\n" "$region" "$name" "$ip1" "$ip2"
+    done
+    echo ""
+    echo -e "  ${CY}Use: provider <name>${CZ}"
+    echo ""
+    read -p "  Press Enter..." _
+}
+
+cmd_mode() {
+    local m=$(select_mode)
+    [ -z "$m" ] && return
+    read_cfg
+    MODE="$m"
+    write_cfg "$MODE" "$NET" "$SIM" "$PROVIDER"
+    echo -e "  ${CG}Mode set: $MODE${CZ}"
+    sleep 1
+}
+
+cmd_net() {
+    local n=$(select_net)
+    [ -z "$n" ] && return
+    read_cfg
+    NET="$n"
+    write_cfg "$MODE" "$NET" "$SIM" "$PROVIDER"
+    echo -e "  ${CG}Network set: $NET${CZ}"
+    sleep 1
+}
+
+cmd_provider() {
+    local p="$1"
+    if [ -z "$p" ]; then
+        p=$(select_provider)
+        [ -z "$p" ] && return
+    fi
+    if apply_provider "$p"; then
+        read_cfg
+        write_cfg "$MODE" "$NET" "$SIM" "$p"
+        if dns_on; then
+            echo -e "  ${CY}Restarting DNS...${CZ}"
+            stop_dns
+            start_dns && echo -e "  ${CG}Applied${CZ}" || echo -e "  ${CR}Failed${CZ}"
+        fi
+    else
+        echo -e "  ${CR}Provider '$p' not found${CZ}"
+    fi
+    sleep 2
+}
+
+cmd_edit() {
+    while true; do
+        show_header
+        read_cfg
+        echo -e "  ${BOLD}Config Editor${CZ}"
+        echo ""
+        echo -e "    Mode:      ${CG}$MODE${CZ}"
+        echo -e "    Network:   ${CG}$NET${CZ}"
+        echo -e "    Provider:  ${CG}$PROVIDER${CZ}"
+        echo ""
+        echo -e "    ${CG}[m]${CZ} Change Mode"
+        echo -e "    ${CG}[n]${CZ} Change Network"
+        echo -e "    ${CG}[p]${CZ} Change Provider"
+        echo -e "    ${CG}[s]${CZ} Save & Restart"
+        echo -e "    ${CR}[b]${CZ} Back"
+        echo ""
+        read -p "  > " e
+        case "$e" in
+            m) cmd_mode ;;
+            n) cmd_net ;;
+            p)
+                local np=$(select_provider)
+                [ -n "$np" ] && { apply_provider "$np"; read_cfg; write_cfg "$MODE" "$NET" "$SIM" "$np"; }
+                ;;
+            s)
+                read_cfg
+                apply_mode $([ "$MODE" = "BOOSTER" ] && echo 1 || echo 2)
+                stop_dns
+                if start_dns; then
+                    echo -e "  ${CG}Saved & Running${CZ}"
+                else
+                    echo -e "  ${CR}Failed${CZ}"
+                fi
+                sleep 2
+                ;;
+            b|"") return ;;
+        esac
+    done
+}
+
+cmd_status() {
+    show_header
+    read_cfg
+    echo -e "  ${BOLD}Status:${CZ}"
+    echo ""
+    if dns_on; then
+        echo -e "    ${CG}● RUNNING${CZ}   (PID: $(dns_pid))"
+    else
+        echo -e "    ${CR}○ STOPPED${CZ}"
+    fi
+    echo ""
+    echo -e "    Mode:      ${CG}$MODE${CZ}"
+    echo -e "    Network:   ${CG}$NET${CZ}"
+    echo -e "    Provider:  ${CG}$PROVIDER${CZ}"
+    echo -e "    DNS Port:  ${CG}${FLOXIN_PORT:-5353}${CZ}"
+    echo ""
+    # Blocklist count
+    if [ -f "$DNS_DIR/blocklist.txt" ]; then
+        echo -e "    Blocklist: ${CG}$(wc -l < $DNS_DIR/blocklist.txt) domains${CZ}"
+    else
+        echo -e "    Blocklist: ${CY}disabled${CZ}"
+    fi
+    echo ""
+    read -p "  Press Enter..." _
+}
+
+cmd_start() {
+    if dns_on; then
+        echo -e "  ${CY}Already running${CZ}"; sleep 1; return
+    fi
+    read_cfg
+    apply_mode $([ "$MODE" = "BOOSTER" ] && echo 1 || echo 2)
+    if start_dns; then
+        echo -e "  ${CG}Started (PID: $(dns_pid))${CZ}"
+    else
+        echo -e "  ${CR}Failed${CZ}"
+        tail -3 "$DNS_LOG"
+    fi
+    sleep 2
+}
+
+cmd_stop() {
+    stop_dns
+    echo -e "  ${CG}Stopped${CZ}"
+    sleep 1
+}
+
+# ═══════════════════════════════════════════════════
+#  Shell Loop
+# ═══════════════════════════════════════════════════
+shell() {
+    shopt -s nocasematch
+    show_header
+    read_cfg
+    if [ "$MODE" = "UNSET" ]; then
+        echo -e "  ${CY}First time — let's set up your config${CZ}"
+        echo ""
+        sleep 2
+        local m=$(select_mode); [ -z "$m" ] && return
+        MODE="$m"
+        local n=$(select_net); [ -z "$n" ] && return
+        NET="$n"
+        local p=$(select_provider)
+        [ -z "$p" ] && p="Cloudflare"
+        PROVIDER="$p"
+        apply_provider "$PROVIDER"
+        apply_mode $([ "$MODE" = "BOOSTER" ] && echo 1 || echo 2)
+        write_cfg "$MODE" "$NET" "$SIM" "$PROVIDER"
+        stop_dns
+        start_dns && echo -e "  ${CG}✓ Started${CZ}" || echo -e "  ${CR}Failed${CZ}"
+        echo ""
+        sleep 1
+    fi
+
+    while true; do
+        read_cfg
+        local pid_txt=""
+        if dns_on; then
+            pid_txt="${CG}●${CZ}"
+        else
+            pid_txt="${CR}○${CZ}"
+        fi
+        # Prompt: #~
+        printf "\n  ${CB}#~${CZ} "
+        read -r line
+
+        [ -z "$line" ] && continue
+        local cmd=$(echo "$line" | awk '{print $1}')
+        local arg=$(echo "$line" | cut -d' ' -f2-)
+
+        case "$cmd" in
+            help|?)       cmd_help ;;
+            providers)    cmd_providers ;;
+            provider)     cmd_provider "$arg" ;;
+            mode)         cmd_mode ;;
+            net|network)  cmd_net ;;
+            edit|config)  cmd_edit ;;
+            status)       cmd_status ;;
+            start)        cmd_start ;;
+            stop)         cmd_stop ;;
+            restart)      cmd_stop; cmd_start ;;
+            test)         bash "$HOME/bin/TESTALL" 2>/dev/null || bash "$HOME/bin/CHECK" ;;
+            sousg)        bash "$HOME/bin/SOUSG" ;;
+            netstate)     bash "$HOME/bin/NETSTATE" ;;
+            panic)        bash "$HOME/bin/PANIC" ;;
+            code|codes)   
+                if [ "$cmd" = "codes" ]; then cmd_codes; else cmd_code "$arg"; fi ;;
+            reload)
+                source "$HOME/.floxin_codes.sh" 2>/dev/null
+                echo -e "  ${CG}Codes reloaded${CZ}"
+                sleep 1 ;;
+            geo)          cmd_geo ;;
+            auto)         cmd_auto ;;
+            run|scenario|sc)  cmd_run "$arg" ;;
+            scenarios)    cmd_scenarios ;;
+            quick)        cmd_quick ;;
+            dv|dv-mode)   cmd_dv ;;
+            advanced|adv) cmd_throttle_menu ;;
+            doctor|fix)   cmd_doctor ;;
+            env|info)     cmd_env ;;
+            export|backup) cmd_export ;;
+            short|sh)     cmd_short ;;
+            [0-9])        cmd_apply_alias "$cmd" ;;
+            F|S|W|M|H|V|A|Z|B|C|R|X|T|L)
+                cmd_apply_alias "$cmd" ;;
+            EG|EGS|EGV|EGE|BC|BM|SM|SA|AO|RO|BL|TH)
+                cmd_apply_alias "$cmd" ;;
+            reset)        cmd_reset ;;
+            history|hist|log) cmd_history ;;
+            clear|cls)    show_header ;;
+            exit|quit|q)  echo -e "\n  ${CY}Bye.${CZ}\n"; return ;;
+            "")           continue ;;
+            FLOX-*|flox-*)
+                # Direct code entry
+                cmd_code "$(echo "$cmd" | tr '[:lower:]' '[:upper:]')" ;;
+            *)
+                # Try simple alias first
+                local _alias=$(resolve_alias "$cmd" 2>/dev/null)
+                if [ -n "$_alias" ]; then
+                    cmd_apply_alias "$cmd"
+                    # Process remaining words as more aliases/commands
+                    for word in $arg; do
+                        local _w=$(echo "$word" | tr '[:lower:]' '[:upper:]')
+                        case "$_w" in
+                            RESET) cmd_reset ;;
+                            CHECK) bash "$HOME/bin/CHECK" 2>/dev/null ;;
+                            STOP)  cmd_stop ;;
+                            STATUS) cmd_status ;;
+                            LOG)   cmd_history ;;
+                            "")
+                                ;;
+                            *)
+                                local _real=$(resolve_alias "$_w" 2>/dev/null)
+                                if [ -n "$_real" ]; then
+                                    cmd_apply_alias "$_w"
+                                else
+                                    # Try as scenario
+                                    local _sc=$(redeem_scenario "$_w" 2>/dev/null)
+                                    if [ -n "$_sc" ]; then
+                                        cmd_run "$_w"
+                                    fi
+                                fi
+                                ;;
+                        esac
+                    done
+                else
+                    # Try as scenario
+                    local _sc=$(redeem_scenario "$cmd" 2>/dev/null)
+                    if [ -n "$_sc" ]; then
+                        cmd_run "$cmd"
+                    else
+                        echo -e "  ${CR}Unknown: $cmd${CZ}  ${CC}(try 'help')${CZ}"
+                    fi
+                fi
+                ;;
+        esac
+    done
+}
+
+# ─── Dispatcher ───
+case "${1:-shell}" in
+    shell|launch|"")  shell ;;
+    bg)               cmd_bg ;;
+    start)            cmd_start ;;
+    restart)          cmd_stop; sleep 1; cmd_bg ;;
+    DV|dv|DV-MODE)    cmd_dv ;;
+    status)           cmd_status ;;
+    stop)             cmd_stop ;;
+    export|backup)    cmd_export ;;
+    advanced|adv)     cmd_throttle_menu ;;
+    doctor|fix)       cmd_doctor ;;
+    env|info)         cmd_env ;;
+    help|-h)          cmd_help ;;
+    *)                echo "Usage: FLOXIN [shell|bg|start|restart|DV|status|stop|export|help]" ;;
+esac
