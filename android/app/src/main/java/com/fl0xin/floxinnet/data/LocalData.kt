@@ -21,6 +21,7 @@ object SettingKeys {
     val network = stringPreferencesKey("network")
     val rtl = booleanPreferencesKey("rtl")
     val apiToken = stringPreferencesKey("api_token")
+    val language = stringPreferencesKey("language")
 }
 
 class TokenStore(private val context: Context) {
