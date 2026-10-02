@@ -25,7 +25,7 @@ fun ProvidersScreen(vm: ProvidersViewModel = viewModel()) {
                             Text(provider["name"].orEmpty(), style = MaterialTheme.typography.titleMedium)
                             Text("${provider["primary"]} · ${provider["region"]}")
                         }
-                        RadioButton(provider["name"] == selected, { vm.selected.value = provider["name"].orEmpty() })
+                        CustomRadio(provider["name"] == selected, { vm.selected.value = provider["name"].orEmpty() })
                     }
                 }
             }
