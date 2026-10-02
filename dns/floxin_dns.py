@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# floxin_dns.py — DNS Server محلي مع Caching + Blocklist
+# floxin_dns.py — Local DNS Server with Caching + Blocklist
 import os
 import sys
 import time
@@ -11,7 +11,7 @@ from dnslib.server import DNSServer, BaseResolver, DNSLogger
 
 
 class SilentLogger(DNSLogger):
-    """Logger صامت — مش بيطبع أي حاجة."""
+    """Silent logger — prints nothing."""
     def log_recv(self, handler, data): pass
     def log_send(self, handler, data): pass
     def log_request(self, handler, request): pass
@@ -21,7 +21,7 @@ class SilentLogger(DNSLogger):
     def log_data(self, dnsobj): pass
     def log_prefix(self, handler): pass
 
-# أوقف logging dnslib المزعج
+# Stop dnslib noisy logging
 import logging
 logging.getLogger("dnslib").setLevel(logging.CRITICAL)
 logging.getLogger("dnslib.server").setLevel(logging.CRITICAL)
@@ -38,12 +38,12 @@ _BLOCKED = set()
 _BLOCKED_LOADED = False
 
 def load_blocklist():
-    """يحمّل قائمة الدومينات المحجوبة."""
+    """Loads the blocked domains list."""
     global _BLOCKED, _BLOCKED_LOADED
     if _BLOCKED_LOADED:
         return
     if not os.path.isfile(BLOCKLIST_FILE):
-        print("[dns] مفيش blocklist")
+        print("[dns] no blocklist")
         _BLOCKED_LOADED = True
         return
     try:
@@ -57,7 +57,7 @@ def load_blocklist():
                     dom = parts[1].lower().strip(".")
                     if dom and dom not in ("localhost",):
                         _BLOCKED.add(dom)
-        print("[dns] blocklist: " + str(len(_BLOCKED)) + " دومين")
+        print("[dns] blocklist: " + str(len(_BLOCKED)) + " domains")
     except Exception as e:
         print("[dns] blocklist error: " + str(e))
     _BLOCKED_LOADED = True
@@ -67,10 +67,10 @@ def load_blocklist():
 QUERY_LOG = os.environ.get("FLOXIN_QUERY_LOG", os.path.join(BASE, "queries.log"))
 
 def log_query(qname, qtype, action, result=""):
-    """يسجل استعلام في queries.log مع rotation."""
+    """Logs a query in queries.log with rotation."""
     try:
         line = f"{time.strftime('%H:%M:%S')}|{qtype}|{action}|{qname}|{result}\n"
-        # اقرأ الملف لو كبير
+        # Read the file if big
         if os.path.exists(QUERY_LOG) and os.path.getsize(QUERY_LOG) > 100000:
             with open(QUERY_LOG, encoding="utf-8", errors="ignore") as f:
                 lines = f.readlines()
@@ -82,7 +82,7 @@ def log_query(qname, qtype, action, result=""):
         pass
 
 
-# دومينات نتجاهلها (لا نطبعها ولا نحجبها)
+# Domains to ignore (don't print or block them)
 _QUIET_SUFFIXES = (
     ".in-addr.arpa", ".ip6.arpa", ".local", ".localdomain",
     "localhost", "local", "broadcasthost",
@@ -90,23 +90,23 @@ _QUIET_SUFFIXES = (
 
 
 def _is_quiet(qname):
-    """يشوف لو الاستعلام للـ PTR/localhost."""
+    """Checks if the query is for PTR/localhost."""
     q = qname.lower()
     for suf in _QUIET_SUFFIXES:
         if q.endswith(suf) or q == suf.lstrip("."):
             return True
-    # شيل أول نقطة
+    # Remove the first dot
     if q.startswith("_") or q in ("0.0.0.0", "255.255.255.255"):
         return True
     return False
 
 
 def is_blocked(qname):
-    """يشوف لو الدومين محجوب (بما فيه subdomains)."""
+    """Checks if the domain is blocked (including subdomains)."""
     q = qname.lower().strip(".")
     if q in _BLOCKED:
         return True
-    # شوف الأباء
+    # Check parents
     parts = q.split(".")
     for i in range(len(parts)):
         parent = ".".join(parts[i:])
@@ -121,7 +121,7 @@ _CACHE_LOCK = threading.Lock()
 
 
 def cache_get(qname, qtype):
-    """يرجع من الـ cache لو موجود ولسه صالح."""
+    """Returns from cache if present and still valid."""
     key = (qname.lower(), qtype)
     with _CACHE_LOCK:
         entry = _CACHE.get(key)
@@ -134,7 +134,7 @@ def cache_get(qname, qtype):
 
 
 def cache_set(qname, qtype, answer, ttl=300):
-    """يحفظ في الـ cache."""
+    """Saves to cache."""
     ttl = max(60, min(ttl, CACHE_TTL))
     key = (qname.lower(), qtype)
     with _CACHE_LOCK:
@@ -142,7 +142,7 @@ def cache_set(qname, qtype, answer, ttl=300):
             "answer": answer,
             "expires": time.time() + ttl,
         }
-        # نمسح لو الـ cache كبر
+        # Purge if cache grows too big
         if len(_CACHE) > 5000:
             now = time.time()
             for k in [k for k, v in _CACHE.items() if v["expires"] < now]:
@@ -155,7 +155,7 @@ UPSTREAM_TIMEOUT = 3
 
 
 def query_upstream(request, upstream_ip):
-    """يبعت الاستعلام لـ DNS خارجي ويرجع الرد."""
+    """Sends query to external DNS and returns response."""
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.settimeout(UPSTREAM_TIMEOUT)
@@ -176,14 +176,14 @@ class FloxinResolver(BaseResolver):
         qname = str(request.q.qname).rstrip(".")
         qtype = QTYPE[request.q.qtype]
 
-        # تجاهل PTR/localhost بصمت (بدون عدّ)
+        # Silently ignore PTR/localhost (without counting)
         if _is_quiet(qname) or qtype in ("PTR", "SOA", "NS", "SRV", "TXT", "ANY"):
             reply = request.reply()
             return reply
 
         self.stats["total"] += 1
 
-        # 1) محجوب؟
+        # 1) Blocked?
         if is_blocked(qname):
             self.stats["blocked"] += 1
             reply = request.reply()
@@ -194,7 +194,7 @@ class FloxinResolver(BaseResolver):
             log_query(qname, qtype, "BLOCK", "0.0.0.0")
             return reply
 
-        # 2) cache؟
+        # 2) cache?
         cached = cache_get(qname, qtype)
         if cached:
             self.stats["cached"] += 1
@@ -217,7 +217,7 @@ class FloxinResolver(BaseResolver):
                     log_query(qname, qtype, "OK", _ans)
                 except Exception:
                     log_query(qname, qtype, "OK", "")
-                # خزّن في الـ cache
+                # Store in cache
                 try:
                     rrs = list(resp.rr) + list(resp.auth)
                     ttl = 300
@@ -228,17 +228,17 @@ class FloxinResolver(BaseResolver):
                     pass
                 return resp
 
-        # 4) فشل
+        # 4) Failed
         return request.reply()
 
     def show_stats(self):
         s = self.stats
         total = max(s["total"], 1)
         print("─" * 40)
-        print("📊 إحصائيات DNS")
-        print("  إجمالي:    " + str(s["total"]))
-        print("  محجوب:     " + str(s["blocked"]) + " (" + str(round(s["blocked"]*100/total, 1)) + "%)")
-        print("  من الكاش:  " + str(s["cached"]) + " (" + str(round(s["cached"]*100/total, 1)) + "%)")
+        print("📊 DNS statistics")
+        print("  Total:    " + str(s["total"]))
+        print("  Blocked:     " + str(s["blocked"]) + " (" + str(round(s["blocked"]*100/total, 1)) + "%)")
+        print("  From cache:  " + str(s["cached"]) + " (" + str(round(s["cached"]*100/total, 1)) + "%)")
         print("  forwarded: " + str(s["forwarded"]))
         print("  cache size: " + str(len(_CACHE)))
         print("─" * 40)
@@ -251,10 +251,10 @@ def main():
     print("═" * 50)
     print()
 
-    # حمّل blocklist
+    # Load blocklist
     load_blocklist()
 
-    # جيب IP التليفون
+    # Get phone IP
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("8.8.8.8", 80))
@@ -272,28 +272,28 @@ def main():
         srv = DNSServer(resolver, port=PORT, address=BIND_ADDRESS, logger=SilentLogger())
         srv.start_thread()
         servers.append(srv)
-        print("✓ يستمع على " + BIND_ADDRESS + ":" + str(PORT))
+        print("✓ listening on " + BIND_ADDRESS + ":" + str(PORT))
     except Exception as e:
         print("✗ " + BIND_ADDRESS + ":" + str(PORT) + " — " + str(e))
 
     if not servers:
         print()
-        print("✗ فشل تشغيل السيرفر")
+        print("✗ failed to start server")
         sys.exit(1)
 
     print()
     print("═" * 50)
-    print("  ✅ DNS شغال")
+    print("  ✅ DNS running")
     print("═" * 50)
-    print("  العنوان:   " + BIND_ADDRESS + ":" + str(PORT))
+    print("  Address:   " + BIND_ADDRESS + ":" + str(PORT))
     print("  cache:    " + str(CACHE_TTL) + "s")
-    print("  محجوب:    " + str(len(_BLOCKED)) + " دومين")
+    print("  Blocked:    " + str(len(_BLOCKED)) + " domains")
     print("═" * 50)
     print()
-    print("اضغط Ctrl+C للإيقاف")
+    print("Press Ctrl+C to stop")
     print()
 
-    # stats كل دقيقة
+    # stats every minute
     def _stats_loop():
         while True:
             time.sleep(60)
@@ -306,14 +306,14 @@ def main():
             time.sleep(1)
     except KeyboardInterrupt:
         print()
-        print("إيقاف...")
+        print("Stopping...")
         resolver.show_stats()
         for s in servers:
             try:
                 s.stop()
             except Exception:
                 pass
-        print("✓ تم")
+        print("✓ done")
 
 
 if __name__ == "__main__":

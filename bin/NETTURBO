@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -u
+TOOL="$HOME/.floxin/tools/netturbo.py"
+[ -f "$TOOL" ] || TOOL="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../tools" && pwd)/netturbo.py"
+exec python3 "$TOOL" "$@"

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# DNSPICK — يجمع أشهر مزودي DNS ويختار الأسرع
+# DNSPICK — gathers common DNS providers and selects the fastest
 
-# ═══ المزودين ═══
-# الصيغة: "اسم|IP1|IP2|DoH_URL"
+# ═══ Providers ═══
+# Format: "Name|IP1|IP2|DoH_URL"
 PROVIDERS=(
     "Cloudflare|1.1.1.1|1.0.0.1|https://cloudflare-dns.com/dns-query"
     "Google|8.8.8.8|8.8.4.4|https://dns.google/dns-query"
@@ -19,7 +19,7 @@ PROVIDERS=(
 CACHE_FILE="$HOME/dnsmasq/dns_providers_cache.json"
 RESULT_FILE="$HOME/dnsmasq/dns_winner.txt"
 
-# ═══ يختبر مزود واحد ═══
+# ═══ Test a single provider ═══
 test_provider() {
     local name="$1"
     local ip="$2"
@@ -45,9 +45,9 @@ test_provider() {
     python3 -c "print(f'{$total / $ok:.2f}')" 2>/dev/null || echo "$total"
 }
 
-# ═══ الأمر: test ═══
+# ═══ Command: test ═══
 cmd_test() {
-    echo "═══ اختبار مزودين DNS ═══"
+    echo "═══ Testing DNS providers ═══"
     echo ""
 
     declare -A RESULTS
@@ -60,7 +60,7 @@ cmd_test() {
         local t=$(test_provider "$name" "$ip1")
 
         if [ "$t" = "999" ]; then
-            echo "✗ فشل"
+            echo "✗ failed"
             continue
         fi
 
@@ -76,19 +76,19 @@ cmd_test() {
     echo ""
     if [ -n "$best_name" ]; then
         echo "═══════════════════════════════════════"
-        echo "  🏆 الأسرع: $best_name ($best_time s)"
+        echo "  🏆 fastest: $best_name ($best_time s)"
         echo "═══════════════════════════════════════"
         echo "$best_name|$best_time" > "$RESULT_FILE"
     else
-        echo "❌ مفيش مزود شغال"
+        echo "❌ No provider working"
         return 1
     fi
 }
 
-# ═══ الأمر: apply ═══
+# ═══ Command: apply ═══
 cmd_apply() {
     if [ ! -f "$RESULT_FILE" ]; then
-        echo "⚠️ اعمل test الأول"
+        echo "⚠️ Run test first"
         exit 1
     fi
 
@@ -104,26 +104,26 @@ cmd_apply() {
     done
 
     if [ -z "$winner_entry" ]; then
-        echo "✗ مش لاقي المزود"
+        echo "✗ provider not found"
         exit 1
     fi
 
     IFS='|' read -r name ip1 ip2 doh <<< "$winner_entry"
 
-    echo "═══ تطبيق $name ═══"
+    echo "═══ Applying $name ═══"
     echo ""
 
-    # عدّل floxin_dns.py
+    # Modify floxin_dns.py
     local DNS_FILE="$HOME/dnsmasq/floxin_dns.py"
     if [ ! -f "$DNS_FILE" ]; then
-        echo "✗ floxin_dns.py مش موجود"
+        echo "✗ floxin_dns.py not found"
         exit 1
     fi
 
-    # نسخة احتياطية
+    # Backup
     cp "$DNS_FILE" "$DNS_FILE.bak"
 
-    # استبدل قائمة UPSTREAM
+    # Replace UPSTREAM list
     python3 << PYEOF
 import re
 path = "$DNS_FILE"
@@ -132,21 +132,21 @@ src = open(path).read()
 new_upstream = 'UPSTREAM = ["$ip1", "$ip2"]'
 src = re.sub(r'UPSTREAM = \[[^\]]*\]', new_upstream, src)
 open(path, 'w').write(src)
-print("✓ تم تحديث floxin_dns.py")
+print("✓ floxin_dns.py updated")
 PYEOF
 
     echo ""
-    echo "🔄 إعادة تشغيل DNS..."
+    echo "🔄 Restarting DNS..."
     DNSMGR restart > /dev/null 2>&1
     sleep 2
     DNSMGR status
 }
 
-# ═══ الأمر: list ═══
+# ═══ Command: list ═══
 cmd_list() {
-    echo "═══ المزودين المتاحين ═══"
+    echo "═══ Available providers ═══"
     echo ""
-    printf "  %-12s %-18s %-30s\n" "الاسم" "IP الأساسي" "DoH"
+    printf "  %-12s %-18s %-30s\n" "Name" "Primary IP" "DoH"
     printf "  %-12s %-18s %-30s\n" "────────────" "─────────────────" "──────────────────────────────"
     for entry in "${PROVIDERS[@]}"; do
         IFS='|' read -r name ip1 ip2 doh <<< "$entry"
@@ -154,37 +154,37 @@ cmd_list() {
     done
 }
 
-# ═══ الأمر: auto (test + apply) ═══
+# ═══ Command: auto (test + apply) ═══
 cmd_auto() {
     cmd_test
     echo ""
     cmd_apply
 }
 
-# ═══ المساعدة ═══
+# ═══ Help ═══
 cmd_help() {
     cat << EOF
-DNSPICK — مدير مزودين DNS
+DNSPICK — DNS provider manager
 
-  DNSPICK list    → عرض المزودين
-  DNSPICK test    → اختبار السرعة
-  DNSPICK apply   → تطبيق الأسرع
-  DNSPICK auto    → test + apply تلقائي
-  DNSPICK show    → عرض المزود الحالي
-  DNSPICK help    → المساعدة
+  DNSPICK list    → Show providers
+  DNSPICK test    → Speed test
+  DNSPICK apply   → Apply fastest
+  DNSPICK auto    → test + apply automatically
+  DNSPICK show    → Show current provider
+  DNSPICK help    → Help
 EOF
 }
 
 cmd_show() {
     if [ -f "$RESULT_FILE" ]; then
-        echo "🏆 المزود الحالي: $(cat $RESULT_FILE)"
+        echo "🏆 Current provider: $(cat $RESULT_FILE)"
     else
-        echo "⚠️ مفيش مزود مختار — شغّل: DNSPICK auto"
+        echo "⚠️ No provider selected — Run: DNSPICK auto"
     fi
 
     if [ -f "$HOME/dnsmasq/floxin_dns.py" ]; then
         echo ""
-        echo "📋 الإعداد الحالي:"
+        echo "📋 Current configuration:"
         grep "^UPSTREAM" "$HOME/dnsmasq/floxin_dns.py"
     fi
 }

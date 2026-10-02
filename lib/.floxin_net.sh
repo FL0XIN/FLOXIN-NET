@@ -1,7 +1,7 @@
 # ~/.floxin_net.sh — FLOXIN Network Shared Library
-# يقرأه DNSMGR و FLOXIN
+# Read by DNSMGR and FLOXIN
 
-# ═══ المسارات ═══
+# ═══ Paths ═══
 export FLOXIN_DNS_DIR="$HOME/dnsmasq"
 export FLOXIN_DNS_SCRIPT="$FLOXIN_DNS_DIR/floxin_dns.py"
 export FLOXIN_DNS_LOG="$FLOXIN_DNS_DIR/dns.log"
@@ -9,12 +9,12 @@ export FLOXIN_DNS_PID="$FLOXIN_DNS_DIR/.dns.pid"
 export FLOXIN_DNS_PORT=5353
 export FLOXIN_LOCK="$FLOXIN_DNS_DIR/.dns.lock"
 
-# ═══ الألوان ═══
+# ═══ Colors ═══
 export FL_G="\033[32m"; export FL_R="\033[31m"
 export FL_Y="\033[33m"; export FL_C="\033[36m"
 export FL_B="\033[34m"; export FL_N="\033[0m"
 
-# ═══ الفحوصات ═══
+# ═══ Checks ═══
 floxin_running() {
     pgrep -f "floxin_dns.py" > /dev/null 2>&1
 }
@@ -37,16 +37,16 @@ floxin_blocking() {
     [ "$b" = "0.0.0.0" ]
 }
 
-# ═══ التشغيل والإيقاف ═══
+# ═══ Start and stop ═══
 floxin_start_bg() {
     if floxin_running; then
         return 0
     fi
-    # قفل لمنع التزامن
+    # Lock to prevent concurrent runs
     if [ -f "$FLOXIN_LOCK" ]; then
         local lock_age=$(( $(date +%s) - $(stat -c %Y "$FLOXIN_LOCK" 2>/dev/null || echo 0) ))
         if [ $lock_age -lt 30 ]; then
-            echo "  ⚠️ عملية تشغيل جارية (منذ ${lock_age}ث) — انتظر"
+            echo "  ⚠️ Start operation in progress (since ${lock_age}s) — wait"
             return 1
         fi
     fi
@@ -71,7 +71,7 @@ floxin_net() {
     if [ -x "$HOME/bin/FLOXIN_NET" ]; then
         bash "$HOME/bin/FLOXIN_NET" "$@"
     else
-        echo "FLOXIN_NET مش موجود"
+        echo "FLOXIN_NET not found"
     fi
 }
 
@@ -80,7 +80,7 @@ floxin_switch() {
     if [ -x "$HOME/bin/DNSPICK" ]; then
         bash "$HOME/bin/DNSPICK" "$@"
     else
-        echo "DNSPICK مش موجود"
+        echo "DNSPICK not found"
     fi
 }
 
@@ -89,7 +89,7 @@ floxin_wehack() {
     if [ -x "$HOME/bin/NETPROBE" ]; then
         bash "$HOME/bin/NETPROBE" "$@"
     else
-        echo "NETPROBE مش موجود"
+        echo "NETPROBE not found"
     fi
 }
 

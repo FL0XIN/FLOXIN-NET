@@ -30,9 +30,19 @@ Use `./install.sh --no-install` when system packages are already present and no 
 
 `NETGUARD start --hours 8` enables sleep protection using an isolated strict DNS blocklist, records blocked query attempts under `~/.floxin_netguard/`, and stops automatically after the timer. Use `NETGUARD status`, `NETGUARD log`, or `NETGUARD stop` to inspect or end the session. NETGUARD does not change iptables automatically; DNS-level blocking is the safe fallback on unrooted systems.
 
+Phase 1 analysis tools are `NETSCAN` (`network`, `quality`, `latency`, `jitter`, `packet-loss`, `dpi-probe`, `qos-detect`) and `NETOPT` (`auto`, `mtu-probe`, `mtu-set`, `tcp-tuning`, `port-test`, `route-test`, `dns-optimize`, `protocol`, `status`, `reset`). They measure first and do not silently alter system networking. See [docs/NETWORK_ANALYSIS.md](docs/NETWORK_ANALYSIS.md).
+
+`NETTURBO scan` compares eight HTTPS ports with repeated CDN measurements and stores history in `~/.floxin_netturbo/`. Use `NETTURBO best`, `NETTURBO monitor`, `NETTURBO apply --port 8443`, `NETTURBO auto`, `NETTURBO stop`, `NETTURBO status`, `NETTURBO history`, and `NETTURBO report`. Applying a port writes a client environment proposal; it does not transparently reroute all system traffic. See [docs/NETTURBO.md](docs/NETTURBO.md).
+
 The maintained executable and library inventory is documented in [docs/SCRIPT_INVENTORY.md](docs/SCRIPT_INVENTORY.md). The current tree does not contain the previously suspected legacy names (`FLOXIN_NET`, `NETCTL`, `MASTER`, `B`, `dv`, or `EMERGENCY`). The remaining scripts are intentionally separate because they provide distinct diagnostics, lifecycle, monitoring, simulation, API, or recovery functions.
 
 The previous command names remain available as symlinks for compatibility, including `DNSF`, `DNSWITCH`, `WEHACK`, `THROTTLE_SIM`, `SOUSG`, `NETSTATE`, `TESTALL`, `SAFE_MODE`, `PANIC`, `CHECK`, and `FLOXIN_API`.
+
+## Languages
+
+[English](README.md) · [العربية](README_AR.md) · [简体中文](README_ZH.md) · [Español](README_ES.md) · [Français](README_FR.md) · [Русский](README_RU.md)
+
+The organized repository tree is documented in [docs/PROJECT_TREE.md](docs/PROJECT_TREE.md).
 
 ## Security and privacy notes
 

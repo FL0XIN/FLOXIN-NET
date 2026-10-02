@@ -24,12 +24,12 @@ _kill_all() {
 }
 
 cmd_start() {
-    echo "═══ تشغيل DNS ═══"
+    echo "═══ Running DNS ═══"
     if [ ! -f "$SCRIPT" ]; then
-        echo "✗ $SCRIPT مش موجود"; exit 1
+        echo "✗ $SCRIPT not found"; exit 1
     fi
     if _is_running; then
-        echo "⚠️ شغال بالفعل"; cmd_status; return
+        echo "⚠️ already running"; cmd_status; return
     fi
     _kill_all
     cd "$DNS_DIR"
@@ -39,15 +39,15 @@ cmd_start() {
     disown
     sleep 3
     if _is_running; then
-        echo "✅ يعمل — PID: $PID"
+        echo "✅ running — PID: $PID"
         echo "🌐 127.0.0.1:$PORT"
         tail -8 "$LOG"
     else
-        echo "✗ فشل"; tail -20 "$LOG"
+        echo "✗ failed"; tail -20 "$LOG"
     fi
 }
 
-cmd_stop() { echo "⏹ إيقاف"; _kill_all; echo "✓"; }
+cmd_stop() { echo "⏹ Stopping"; _kill_all; echo "✓"; }
 
 cmd_restart() { cmd_stop; sleep 1; cmd_start; }
 
@@ -55,64 +55,64 @@ cmd_status() {
     if _is_running; then
         PID=$(cat "$PID_FILE" 2>/dev/null)
         [ -z "$PID" ] && PID=$(pgrep -f "floxin_dns.py" | head -1)
-        echo "✅ يعمل — PID: $PID"
+        echo "✅ running — PID: $PID"
         ps -p $PID -o %cpu,%mem,etime 2>/dev/null
         echo ""
         tail -5 "$LOG"
     else
-        echo "❌ متوقف"
+        echo "❌ stopped"
     fi
 }
 
 cmd_log() { tail -f "$LOG"; }
 
 cmd_test() {
-    echo "═══ اختبار ═══"
-    if ! _is_running; then echo "⚠️ شغّل: DNSMGR start"; return; fi
+    echo "═══ Test ═══"
+    if ! _is_running; then echo "⚠️ Run: DNSMGR start"; return; fi
     echo "1) google:"; nslookup -type=A google.com 127.0.0.1 2>&1 | tail -4
     echo ""
-    echo "2) doubleclick (محجوب):"; nslookup -type=A doubleclick.net 127.0.0.1 2>&1 | tail -4
+    echo "2) doubleclick (blocked):"; nslookup -type=A doubleclick.net 127.0.0.1 2>&1 | tail -4
 }
 
 cmd_vpn() {
-    echo "═══ حالة VPN ═══"
+    echo "═══ VPN status ═══"
     echo ""
 
-    # كشف VPN الحقيقي (tun interface)
+    # Detect real VPN (tun interface)
     local VPN_IFACE=$(ifconfig 2>/dev/null | grep -E "^(tun|ppp|wg)[0-9]" | head -1 | cut -d: -f1)
     if [ -n "$VPN_IFACE" ]; then
-        echo "  ⚠️ VPN شغال ($VPN_IFACE)"
-        echo "     ملاحظة: DNS بتاعنا مش بيتستخدم"
+        echo "  ⚠️ VPN active ($VPN_IFACE)"
+        echo "     Note: our DNS is not being used"
         WARP=1
     else
-        echo "  ✓ VPN مقفول"
+        echo "  ✓ VPN down"
         WARP=""
     fi
     echo ""
 
-    # هل DNS بتاعنا شغال؟
+    # Is our DNS running?
     if pgrep -f "floxin_dns.py" > /dev/null; then
-        echo "  ✓ DNS المحلي شغال"
+        echo "  ✓ local DNS is running"
     else
-        echo "  ✗ DNS المحلي متوقف"
+        echo "  ✗ local DNS stopped"
     fi
     echo ""
 
-    # التحذير
+    # Warning
     if [ -n "$WARP" ]; then
         echo "═══════════════════════════════════════"
-        echo "  ⚠️ تحذير: تعارض محتمل"
+        echo "  ⚠️ Warning: possible conflict"
         echo "═══════════════════════════════════════"
-        echo "  الـ VPN بياخد الترافيك كله،"
-        echo "  فالـ DNS المحلي مش بيتخدم."
+        echo "  The VPN takes all traffic,"
+        echo "  so local DNS isn't used."
         echo ""
-        echo "  الحل:"
-        echo "  - للـ DNS فقط: اقفل الـ VPN"
-        echo "  - للـ VPN فقط: DNSMGR stop ثم افتح VPN"
-        echo "  - للاتنين: مفيش حل على Termux"
+        echo "  Solution:"
+        echo "  - For DNS only: turn off the VPN"
+        echo "  - For VPN only: DNSMGR stop then start VPN"
+        echo "  - For both: no solution on Termux"
     else
         echo "═══════════════════════════════════════"
-        echo "  ✓ مفيش تعارض"
+        echo "  ✓ No conflict"
         echo "═══════════════════════════════════════"
     fi
 }
@@ -121,36 +121,36 @@ cmd_mode() {
     local mode="${1:-show}"
     case "$mode" in
         dns)
-            echo "═══ وضع DNS فقط ═══"
-            echo "  (لا VPN + DNS شغال)"
+            echo "═══ DNS-only mode ═══"
+            echo "  (No VPN + DNS running)"
             echo ""
-            # اقفل أي VPN مفتوح
-            echo "  ⚠️  اقفل WARP و Psiphon يدوياً من تليفونك"
+            # Turn off any open VPN
+            echo "  ⚠️  Manually turn off WARP and Psiphon from your phone"
             echo ""
-            # تأكد DNS شغال
+            # Ensure DNS is running
             if ! pgrep -f "floxin_dns.py" > /dev/null; then
-                echo "  → تشغيل DNS..."
+                echo "  → Starting DNS..."
                 cd "$HOME/dnsmasq" && nohup python3 floxin_dns.py > dns.log 2>&1 &
                 disown
                 sleep 2
             fi
-            echo "  ✓ DNS شغال على 127.0.0.1:5353"
-            echo "  ✓ الحجب فعّال"
+            echo "  ✓ DNS running on 127.0.0.1:5353"
+            echo "  ✓ blocking is active"
             ;;
         vpn)
-            echo "═══ وضع VPN فقط ═══"
-            echo "  (VPN + DNS مقفول)"
+            echo "═══ VPN-only mode ═══"
+            echo "  (VPN + DNS disabled)"
             echo ""
-            # اقفل DNS
+            # Turn off DNS
             if pgrep -f "floxin_dns.py" > /dev/null; then
-                echo "  → إيقاف DNS..."
+                echo "  → Stopping DNS..."
                 pkill -9 -f "floxin_dns.py"
                 sleep 1
             fi
-            echo "  ✓ DNS متوقف"
+            echo "  ✓ DNS stopped"
             echo ""
-            echo "  → افتح WARP (1.1.1.1) من تليفونك"
-            echo "  → لو فشل: افتح Psiphon Pro"
+            echo "  → Open WARP (1.1.1.1) on your phone"
+            echo "  → If it fails: open Psiphon Pro"
             ;;
         show|*)
             cmd_vpn
@@ -162,19 +162,19 @@ cmd_help() {
     cat << EOF
 DNSMGR — FLOXIN DNS Manager
 
-  DNSMGR start         → تشغيل DNS
-  DNSMGR stop          → إيقاف DNS
-  DNSMGR restart       → إعادة تشغيل
-  DNSMGR status        → الحالة
-  DNSMGR log           → السجل
-  DNSMGR test          → اختبار شامل
+  DNSMGR start         → Start DNS
+  DNSMGR stop          → Stop DNS
+  DNSMGR restart       → Restart
+  DNSMGR status        → Status
+  DNSMGR log           → Log
+  DNSMGR test          → Full test
 
-  DNSMGR vpn           → فحص تعارض VPN
-  DNSMGR mode dns      → وضع DNS فقط (يقفل VPN)
-  DNSMGR mode vpn      → وضع VPN فقط (يقفل DNS)
-  DNSMGR mode show     → عرض الوضع الحالي
+  DNSMGR vpn           → Check VPN conflict
+  DNSMGR mode dns      → DNS-only mode (disables VPN)
+  DNSMGR mode vpn      → VPN-only mode (disables DNS)
+  DNSMGR mode show     → Show current mode
 
-  DNSMGR help          → المساعدة
+  DNSMGR help          → Help
 EOF
 }
 

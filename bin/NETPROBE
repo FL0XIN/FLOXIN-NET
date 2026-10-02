@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-# NETPROBE — تكتيكات ضد throttling WE (مصر)
+# NETPROBE — tactics against WE throttling (Egypt)
 
-TEST_BYTES=500000   # 500 KB للاختبار
+TEST_BYTES=500000   # 500 KB for testing
 RESULTS="$HOME/dnsmasq/wehack_results.txt"
 mkdir -p "$(dirname "$RESULTS")"
 
-# ═══ Helper: قياس سرعة URL ═══
+# ═══ Helper: measure URL speed ═══
 speed_test() {
     local url="$1"
     local label="$2"
     printf "  %-25s " "$label"
     local speed=$(curl -o /dev/null -s -w "%{speed_download}" --max-time 15 "$url" 2>/dev/null)
     if [ -z "$speed" ] || [ "$speed" = "0" ]; then
-        echo "✗ فشل"
+        echo "✗ failed"
         echo "$label=0" >> "$RESULTS"
     else
         python3 -c "print(f'{$speed/1024:.1f} KB/s')"
@@ -20,11 +20,11 @@ speed_test() {
     fi
 }
 
-# ═══ التكتيك 1: Port Scan ═══
+# ═══ Tactic 1: Port Scan ═══
 tactic_ports() {
-    echo "═══ 1) Port Scan — أنهي port مش throttled؟ ═══"
+    echo "═══ 1) Port Scan — which port isn't throttled? ═══"
     echo ""
-    # Cloudflare edge IP — بيدعم كل البورتات دي
+    # Cloudflare edge IP — supports all these ports
     local CF="speed.cloudflare.com"
     local PORTS=(443 8443 2053 2083 2087 2096 8080 8880)
     for p in "${PORTS[@]}"; do
@@ -33,26 +33,26 @@ tactic_ports() {
     echo ""
 }
 
-# ═══ التكتيك 2: Whitelisted Domains ═══
+# ═══ Tactic 2: Whitelisted Domains ═══
 tactic_whitelist() {
-    echo "═══ 2) Whitelisted Domains — مواقع مسموحة عند WE؟ ═══"
+    echo "═══ 2) Whitelisted Domains — sites allowed by WE? ═══"
     echo ""
     speed_test "https://www.speedtest.net/speedtest-servers-static.php" "speedtest.net"
-    speed_test "https://www.ekb.eg/" "ekb.eg (حكومي)"
+    speed_test "https://www.ekb.eg/" "ekb.eg (government)"
     speed_test "https://www.google.com/favicon.ico" "Google"
     speed_test "https://www.cloudflare.com/favicon.ico" "Cloudflare"
     echo ""
 }
 
-# ═══ التكتيك 3: HTTP/3 (QUIC) ═══
+# ═══ Tactic 3: HTTP/3 (QUIC) ═══
 tactic_http3() {
     echo "═══ 3) HTTP/3 (QUIC) — UDP/443 ═══"
     echo ""
     if command -v curl >/dev/null 2>&1; then
         local version=$(curl --version | grep -o "HTTP3" | head -1)
         if [ -z "$version" ]; then
-            echo "  ⚠️ curl مش مبني بـ HTTP/3"
-            echo "  (محتاج إعادة بناء curl مع ngtcp2)"
+            echo "  ⚠️ curl not built with HTTP/3"
+            echo "  (needs curl rebuilt with ngtcp2)"
         else
             speed_test "https://cloudflare-quic.com/" "QUIC test"
         fi
@@ -60,7 +60,7 @@ tactic_http3() {
     echo ""
 }
 
-# ═══ التكتيك 4: DNS Port Test ═══
+# ═══ Tactic 4: DNS Port Test ═══
 tactic_dns() {
     echo "═══ 4) DNS — 53 vs 5353 vs DoH ═══"
     echo ""
@@ -68,48 +68,48 @@ tactic_dns() {
     local t1=$( { /usr/bin/time -f "%e" nslookup google.com 1.1.1.1 >/dev/null 2>&1; } 2>&1 )
     echo "${t1}s"
 
-    printf "  %-25s " "Port 5353 (محلي):"
+    printf "  %-25s " "Port 5353 (local):"
     local t2=$( { /usr/bin/time -f "%e" nslookup google.com 127.0.0.1 >/dev/null 2>&1; } 2>&1 )
     echo "${t2}s"
     echo ""
 }
 
-# ═══ التكتيك 5: IPv6 ═══
+# ═══ Tactic 5: IPv6 ═══
 tactic_ipv6() {
-    echo "═══ 5) IPv6 — ممكن مش throttled ═══"
+    echo "═══ 5) IPv6 — might not be throttled ═══"
     echo ""
     local ipv6=$(ip -6 addr show 2>/dev/null | grep "inet6" | grep -v "::1" | head -1)
     if [ -z "$ipv6" ]; then
-        echo "  ⚠️ مفيش IPv6 على الجهاز"
+        echo "  ⚠️ No IPv6 on device"
     else
-        echo "  ✓ فيه IPv6: $ipv6"
+        echo "  ✓ IPv6 present: $ipv6"
         printf "  %-25s " "IPv6 test:"
         speed_test "https://ipv6.google.com/favicon.ico" "IPv6 Google"
     fi
     echo ""
 }
 
-# ═══ التكتيك 6: Cloudflare WARP ═══
+# ═══ Tactic 6: Cloudflare WARP ═══
 tactic_warp() {
-    echo "═══ 6) Cloudflare WARP — مجاني وسريع ═══"
+    echo "═══ 6) Cloudflare WARP — free and fast ═══"
     echo ""
-    echo "  🎯 الرابط: https://1.1.1.1/"
+    echo "  🎯 Link: https://1.1.1.1/"
     echo "  📱 App: 1.1.1.1 (Cloudflare)"
-    echo "  ✅ مجاني 100%، مش محتاج API key"
-    echo "  ✅ بيتخطى throttling في مصر عند كتير من الناس"
+    echo "  ✅ 100% free, does not require an API key"
+    echo "  ✅ bypasses throttling in Egypt for many users"
     echo ""
-    echo "  أوامر سريعة:"
+    echo "  Quick commands:"
     echo "    pkg install wireguard-tools"
-    echo "    (بعدها هنعمل إعداد WARP يدوي)"
+    echo "    (afterwards we'll do WARP setup manually)"
     echo ""
 }
 
-# ═══ تشغيل الكل ═══
+# ═══ Run all ═══
 cmd_all() {
     > "$RESULTS"
     echo ""
     echo "═══════════════════════════════════════"
-    echo "  NETPROBE — تكتيكات ضد WE"
+    echo "  NETPROBE — tactics against WE"
     echo "  $(date '+%Y-%m-%d %H:%M')"
     echo "═══════════════════════════════════════"
     echo ""
@@ -122,11 +122,11 @@ cmd_all() {
     tactic_warp
 
     echo "═══════════════════════════════════════"
-    echo "  📊 التحليل"
+    echo "  📊 Analysis"
     echo "═══════════════════════════════════════"
     echo ""
 
-    # حلل النتائج
+    # Analyze the results
     python3 << PYEOF
 import re
 results = {}
@@ -144,17 +144,17 @@ except:
 
 if results:
     best = max(results.items(), key=lambda x: x[1])
-    print(f"  🏆 الأسرع: {best[0]} ({best[1]/1024:.1f} KB/s)")
+    print(f"  🏆 fastest: {best[0]} ({best[1]/1024:.1f} KB/s)")
     print()
-    print("  📈 الترتيب:")
+    print("  📈 Ranking:")
     for k, v in sorted(results.items(), key=lambda x: -x[1])[:5]:
         print(f"    {k:30} {v/1024:8.1f} KB/s")
 else:
-    print("  ⚠️ مفيش نتائج")
+    print("  ⚠️ No results")
 PYEOF
 
     echo ""
-    echo "  💾 النتائج الكاملة: $RESULTS"
+    echo "  💾 Full results: $RESULTS"
 }
 
 # ═══ Main ═══

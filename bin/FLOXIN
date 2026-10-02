@@ -927,6 +927,9 @@ cmd_help() {
     echo -e "  ${CG}clear${CZ}           Clear screen"
     echo -e "  ${CG}exit${CZ}            Exit shell"
     echo -e "  ${CG}netguard start${CZ}  Sleep protection mode"
+    echo -e "  ${CG}netscan quality${CZ} Network quality analysis"
+    echo -e "  ${CG}netopt auto${CZ}     Measurement-based recommendations"
+    echo -e "  ${CG}netturbo scan${CZ}   Measure alternate CDN ports"
     echo ""
     echo -e "${CC}═══════ CONFIGURATION ═══════${CZ}"
     echo -e "  ${CG}mode${CZ}            Change mode (Booster / Saver / 2X1)"
@@ -1216,6 +1219,9 @@ shell() {
             netguard|guard)
                 read -r -a guard_args <<< "$arg"
                 bash "$HOME/bin/NETGUARD" "${guard_args[@]}" ;;
+            netscan)      bash "$HOME/bin/NETSCAN" $arg ;;
+            netopt)       bash "$HOME/bin/NETOPT" $arg ;;
+            netturbo)     bash "$HOME/bin/NETTURBO" $arg ;;
             short|sh)     cmd_short ;;
             [0-9])        cmd_apply_alias "$cmd" ;;
             F|S|W|M|H|V|A|Z|B|C|R|X|T|L)
@@ -1285,6 +1291,9 @@ case "${1:-shell}" in
     stop)             cmd_stop ;;
     export|backup)    cmd_export ;;
     api)              bash "$HOME/bin/FLOXIN-API" "${2:-status}" ;;
+    netscan)          shift; bash "$HOME/bin/NETSCAN" "$@" ;;
+    netopt)           shift; bash "$HOME/bin/NETOPT" "$@" ;;
+    netturbo)         shift; bash "$HOME/bin/NETTURBO" "$@" ;;
     advanced|adv)     cmd_throttle_menu ;;
     doctor|fix)       cmd_doctor ;;
     env|info)         cmd_env ;;

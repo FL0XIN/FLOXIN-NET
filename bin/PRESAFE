@@ -1,32 +1,32 @@
 #!/usr/bin/env bash
-# PRESAFE — يشتغل بدون نت، يحضّر كل حاجة للـ throttle
+# PRESAFE — works offline, prepares everything for throttle
 
 echo "═══════════════════════════════════════"
-echo "  PRESAFE — تحضير للـ Throttle"
+echo "  PRESAFE — preparing for Throttle"
 echo "═══════════════════════════════════════"
 echo ""
 
-# ═══ 1) تشغيل DNS المحلي ═══
-echo "[1/5] تشغيل DNS المحلي..."
+# ═══ 1) Start local DNS ═══
+echo "[1/5] Starting local DNS..."
 if pgrep -f "floxin_dns.py" > /dev/null 2>&1; then
-    echo "  ✓ شغال بالفعل"
+    echo "  ✓ already running"
 else
     cd ~/dnsmasq && nohup python3 floxin_dns.py > dns.log 2>&1 &
     sleep 2
-    echo "  ✓ تم التشغيل"
+    echo "  ✓ started"
 fi
 
-# ═══ 2) تحميل blocklist كامل ═══
-echo "[2/5] فحص blocklist..."
+# ═══ 2) Download full blocklist ═══
+echo "[2/5] Checking blocklist..."
 if [ -f "$HOME/dnsmasq/blocklist.txt" ]; then
     LINES=$(wc -l < "$HOME/dnsmasq/blocklist.txt")
-    echo "  ✓ $LINES دومين محجوب (محفوظ محلياً)"
+    echo "  ✓ $LINES domains blocked (saved locally)"
 else
-    echo "  ⚠️ blocklist مش موجود — شغّل: DNSMGR update (محتاج نت)"
+    echo "  ⚠️ blocklist not found — Run: DNSMGR update (requires internet)"
 fi
 
-# ═══ 3) تحميل قوائم إضافية (لو فيه نت) ═══
-echo "[3/5] تحميل قوائم إضافية..."
+# ═══ 3) Download extra lists (if online) ═══
+echo "[3/5] Downloading extra lists..."
 cd ~/dnsmasq
 for url in \
     "https://raw.githubusercontent.com/AdguardTeam/cname-trackers/master/data/combined_disguised_trackers_justdomains.txt|extra_trackers.txt" \
@@ -35,55 +35,55 @@ do
     IFS='|' read -r u f <<< "$url"
     if [ ! -f "$f" ]; then
         curl -sS -L --max-time 20 -o "$f" "$u" 2>/dev/null && \
-            echo "  ✓ $f ($(wc -l < $f) سطر)" || \
-            echo "  ⚠️ فشل $f (هيتبعت المرة الجاية)"
+            echo "  ✓ $f ($(wc -l < $f) lines)" || \
+            echo "  ⚠️ failed $f (will be retried next time)"
     else
-        echo "  ✓ $f موجود"
+        echo "  ✓ $f exists"
     fi
 done
 
-# ═══ 4) اختبار السرعة الحالية ═══
-echo "[4/5] اختبار السرعة..."
+# ═══ 4) Test current speed ═══
+echo "[4/5] Testing speed..."
 SPEED=$(curl -o /dev/null -s -w "%{speed_download}" --max-time 10 "https://speed.cloudflare.com/__down?bytes=200000" 2>/dev/null)
 if [ -z "$SPEED" ] || [ "$SPEED" = "0" ]; then
-    echo "  ⚠️ مفيش اتصال"
+    echo "  ⚠️ No connection"
     STATUS="offline"
 elif python3 -c "exit(0 if $SPEED < 50000 else 1)" 2>/dev/null; then
     echo "  🔴 Throttled ($(python3 -c "print(f'{$SPEED/1024:.0f} KB/s')"))"
     STATUS="throttled"
 else
-    echo "  🟢 سرعة طبيعية ($(python3 -c "print(f'{$SPEED/1024:.0f} KB/s')"))"
+    echo "  🟢 normal speed ($(python3 -c "print(f'{$SPEED/1024:.0f} KB/s')"))"
     STATUS="normal"
 fi
 
-# ═══ 5) توصيات ═══
-echo "[5/5] التوصيات..."
+# ═══ 5) Recommendations ═══
+echo "[5/5] Recommendations..."
 echo ""
 case "$STATUS" in
     offline)
-        echo "  📱 مفيش نت"
-        echo "  → DNS المحلي شغال، blocklist محفوظ"
-        echo "  → لما النت يرجع، شغّل: PRESAFE"
+        echo "  📱 No internet"
+        echo "  → Local DNS running, blocklist saved"
+        echo "  → When internet returns, run: PRESAFE"
         ;;
     throttled)
         echo "  🔴 Throttle!"
         echo ""
-        echo "  الحلول مرتبة بالأفضلية:"
-        echo "  1. Cloudflare WARP (1.1.1.1 من Play Store)"
-        echo "  2. شغّل NETPROBE للمقارنة: NETPROBE all"
-        echo "  3. شغّل DNSPICK لاختيار أسرع DNS: DNSPICK auto"
+        echo "  Solutions ordered by preference:"
+        echo "  1. Cloudflare WARP (1.1.1.1 from Play Store)"
+        echo "  2. Run NETPROBE to compare: NETPROBE all"
+        echo "  3. Run DNSPICK to choose the fastest DNS: DNSPICK auto"
         ;;
     normal)
-        echo "  🟢 كل حاجة تمام"
-        echo "  → استفد بالسرعة العادية"
+        echo "  🟢 Everything is fine"
+        echo "  → Enjoy the normal speed"
         ;;
 esac
 
 echo ""
 echo "═══════════════════════════════════════"
-echo "  💾 كل حاجة محفوظة محلياً"
+echo "  💾 Everything saved locally"
 echo "═══════════════════════════════════════"
 echo ""
-echo "  السكربتات: ~/bin/"
+echo "  Scripts: ~/bin/"
 echo "  DNS data:  ~/dnsmasq/"
-echo "  الأدوات:  ~/net_tools/"
+echo "  Tools:  ~/net_tools/"

@@ -9,6 +9,9 @@ This inventory was verified against the current `main` tree, `bin/FLOXIN` dispat
 | `bin/FLOXIN` | Primary interactive shell, aliases, configuration, diagnostics, API dispatch | User entry point |
 | `bin/FLOXIN-API` | Start/stop/status/log for the local FastAPI service | `FLOXIN api`, API docs |
 | `bin/NETGUARD` | Sleep protection with isolated strict DNS blocklist, timer, query log, and report | User entry point |
+| `bin/NETSCAN` | Measurement-only network quality, latency, jitter, packet-loss, and behavior checks | User entry point; `FLOXIN netscan` |
+| `bin/NETOPT` | Measurement-based MTU, route, DNS, protocol, and TCP recommendations | User entry point; `FLOXIN netopt` |
+| `bin/NETTURBO` | Alternate HTTPS port measurements, SQLite history, selection, and monitoring | User entry point; `FLOXIN netturbo` |
 | `bin/DNSMGR` | DNS resolver lifecycle and DNS/VPN mode commands | User, `FLOXIN`, `NETMON`, tests |
 | `bin/QUICKCHECK` | Fast connection, resolver, blocklist, and speed check | `FLOXIN test` fallback |
 | `bin/DNSPICK` | DNS provider latency testing and provider selection | `FLOXIN` menu, `PRESAFE` |
@@ -30,6 +33,9 @@ This inventory was verified against the current `main` tree, `bin/FLOXIN` dispat
 | `lib/.floxin_simple.sh` | Beginner aliases and quick commands | sourced by `FLOXIN` and referenced by `FLOXIN simple` |
 | `lib/.floxin_short.sh` | Short command aliases | sourced by `FLOXIN` and referenced by `FLOXIN short` |
 | `lib/.floxin_sleepblock.sh` | NETGUARD isolated blocklist, state, and report helpers | sourced by `NETGUARD` |
+| `lib/.floxin_netscan.sh` | NETSCAN shell defaults and help integration | sourced by installer/developer workflows |
+| `lib/.floxin_netopt.sh` | NETOPT state defaults and help integration | sourced by installer/developer workflows |
+| `lib/.floxin_netturbo.sh` | NETTURBO storage default and help integration | sourced by installer/developer workflows |
 
 ## Cleanup result
 

@@ -6,13 +6,13 @@ CG='\033[32m'; CR='\033[31m'; CY='\033[33m'; CC='\033[36m'; CZ='\033[0m'
 dns_on()   { pgrep -f "floxin_dns.py" > /dev/null 2>&1; }
 proxy_on() { pgrep -f "throttle_proxy.py" > /dev/null 2>&1; }
 
-# كشف VPN — طرق حقيقية
+# Detect VPN — real methods
 vpn_detect() {
     # 1) interfaces (tun/ppp)
     if ifconfig 2>/dev/null | grep -qE "^(tun|ppp|wg)[0-9]"; then
         return 0
     fi
-    # 2) route (لو متاح)
+    # 2) route (if available)
     if [ -r /proc/net/route ]; then
         if grep -q "tun\|ppp" /proc/net/route 2>/dev/null; then
             return 0
@@ -25,7 +25,7 @@ vpn_detect() {
     return 1
 }
 
-# كشف الاتصال بالنت
+# Detect internet connectivity
 net_works() {
     timeout 5 curl -s -o /dev/null -w "%{http_code}" --max-time 4 "https://1.1.1.1" 2>/dev/null | grep -qE "200|301|302|400|403"
 }

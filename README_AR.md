@@ -1,47 +1,8 @@
-# FLOXIN NET
 
-أداة DNS محلية متعددة المنصات لـ Linux وmacOS وAndroid وWSL وDocker وproot، مع الحفاظ على أوامر FLOXIN الحالية.
+## NETTURBO
 
-## ماذا تفعل؟
+يفحص `NETTURBO scan` ثمانية منافذ HTTPS ويحفظ النتائج في SQLite. استخدم `best` و`monitor` و`apply --port 8443` و`status` و`history` و`report`. يحفظ الأداة اقتراحًا لعملاء يدعمون اختيار المنفذ، ولا تعيد توجيه كل حركة النظام تلقائيًا.
 
-تشغّل الأداة خادم DNS محليًا مع كاش اختياري وقائمة حجب مبنية على قائمة StevenBlack. كما تحتفظ بوظائف توفير البيانات، وضع السرعة، تبديل مزودي DNS، كشف تعارض VPN، الفحص والإصلاح، السيناريوهات، أكواد التفعيل، التصدير، ووضع الطوارئ.
-
-> الأداة لا تنشئ VPN ولا تضمن زيادة سرعة الإنترنت أو تجاوز سياسات مزود الخدمة. النتيجة تعتمد على الشبكة ومزود DNS المختار.
-
-## الكشف التلقائي
-
-يكتشف المثبّت بيئات Android، توزيعات Linux الشائعة، macOS، WSL، Docker وproot-distro. ويعرض المعالج، نسخة النظام، الذاكرة المتاحة، المساحة الحرة، مدير الحزم، صلاحيات root وsudo ووجود proot.
-
-الوضع الآمن الافتراضي هو `127.0.0.1:5353` ولا يحتاج إلى root. يمكن للمستخدم المتقدم ضبط `FLOXIN_PORT` و`FLOXIN_BIND_ADDRESS`، لكن لا يُنصح بفتح خادم DNS على الشبكة إلا مع شبكة موثوقة وجدار ناري مناسب.
-
-## التثبيت
-
-```bash
-git clone https://github.com/FL0XIN/FLOXIN-NET.git
-cd floxin-net
-./setup.sh
-```
-
-استخدم `./install.sh --no-install` إذا كانت المتطلبات موجودة ولا تريد تعديل حزم النظام. المثبّت ينشر الملفات الحالية إلى `~/bin` و`~/` و`~/dnsmasq`، ولا يعيد بناء المشروع من الصفر. كما يحافظ إلغاء التثبيت على بيانات المستخدم مثل القائمة والسجلات والإعدادات والنسخ الاحتياطية.
-
-## الأوامر الأساسية
-
-يشغّل `FLOXIN` الواجهة التفاعلية. ويبدأ `FLOXIN start` خادم DNS في الخلفية، بينما يفحص `FLOXIN doctor` المتطلبات ويصلحها، ويعرض `FLOXIN env` معلومات النظام، وينشئ `FLOXIN export` نسخة احتياطية. يدير `DNSMGR start|stop|restart|status|test` الخادم، ويشغّل `NETCHECK` الفحوصات. وتظل أوامر `FAST` و`SAVE` و`HIDE` و`VPN` و`ALL`، إلى جانب `run <CODE>` و`code <CODE>`، متاحة.
-
-يوفّر `NETGUARD start --hours 8` وضع حماية أثناء النوم: يستخدم قائمة حجب DNS معزولة، يسجّل محاولات الاستعلام في `~/.floxin_netguard/`، ويتوقف تلقائيًا بعد انتهاء المؤقت. استخدم `NETGUARD status` أو `NETGUARD log` أو `NETGUARD stop`. لا يغيّر NETGUARD قواعد iptables تلقائيًا؛ ويستخدم حجب DNS الآمن كحل احتياطي على الأجهزة التي لا تملك root.
-
-الأسماء القديمة مثل `DNSF` و`DNSWITCH` و`WEHACK` و`THROTTLE_SIM` و`SOUSG` و`NETSTATE` و`TESTALL` و`SAFE_MODE` و`PANIC` و`CHECK` و`FLOXIN_API` محفوظة كروابط رمزية للتوافق.
-
-## ملاحظات أمنية وخصوصية
-
-الخادم يستمع على localhost افتراضيًا. تُحفظ سجلات الاستعلامات في `~/dnsmasq/queries.log` وقد تحتوي على أسماء نطاقات خاصة. تمر الاستعلامات إلى مزود DNS المحدد. راجع المزودين والقوائم قبل الاستخدام ولا تشغّل سكربتات محمّلة دون فحصها.
-
-## الاختبارات
-
-```bash
-bash tests/test_commands.sh
-bash tests/test_dns.sh
-bash tests/test_install.sh
-```
-
-الترخيص MIT، راجع ملف `LICENSE`.
+- [شجرة المشروع](docs/PROJECT_TREE.md)
+- [توثيق تحليل الشبكة](docs/NETWORK_ANALYSIS.md)
+- [English README](README.md)

@@ -16,7 +16,7 @@ info(){ printf '  %b[INFO]%b %s\n' "$CC" "$CZ" "$1"; }
 
 OS="$(floxin_os_name)"; PM="$(floxin_package_manager)"
 HOME_BIN="${HOME}/bin"; DNS_DIR="${HOME}/dnsmasq"
-mkdir -p "$HOME_BIN" "$DNS_DIR" || { bad "cannot create $HOME_BIN or $DNS_DIR"; exit 1; }
+mkdir -p "$HOME_BIN" "$DNS_DIR" "$HOME/.floxin/tools" || { bad "cannot create install directories"; exit 1; }
 
 echo -e "${CC}=========================================${CZ}"
 echo -e "${CC}  FLOXIN NET — Installer v1.1${CZ}"
@@ -59,6 +59,7 @@ for f in "$ROOT_DIR"/bin/*; do cp -a "$f" "$HOME_BIN/" && chmod +x "$HOME_BIN/$(
 for f in "$ROOT_DIR"/lib/.*.sh; do cp "$f" "$HOME/" || bad "copy $(basename "$f")"; done
 cp "$ROOT_DIR/dns/floxin_dns.py" "$DNS_DIR/" || bad "copy floxin_dns.py"
 chmod +x "$DNS_DIR/floxin_dns.py"
+for f in "$ROOT_DIR"/tools/*.py; do cp "$f" "$HOME/.floxin/tools/" || bad "copy $(basename "$f")"; done
 
 BL="$DNS_DIR/blocklist.txt"
 if [ -s "$BL" ] && [ "$(wc -l < "$BL")" -gt 10000 ]; then ok "existing blocklist ($(wc -l < "$BL") lines)"; else

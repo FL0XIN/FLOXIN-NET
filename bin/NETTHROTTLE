@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# NETTHROTTLE — محاكي throttle محلي
+# NETTHROTTLE — local throttle simulator
 
 PROXY_PORT=7777
 PROXY_PID_FILE="$HOME/dnsmasq/.sim.pid"
 PROXY_LOG="$HOME/dnsmasq/sim.log"
 
-# ═══ تشغيل proxy يحد السرعة ═══
+# ═══ Start proxy that limits speed ═══
 cmd_start() {
-    echo "═══ تشغيل محاكي Throttle ═══"
+    echo "═══ Starting Throttle simulator ═══"
 
     if pgrep -f "throttle_proxy.py" > /dev/null; then
-        echo "  ⚠️ شغال بالفعل"
+        echo "  ⚠️ already running"
         return
     fi
 
-    # نسوي ملف الـ proxy
+    # Create the proxy file
     cat > "$HOME/dnsmasq/throttle_proxy.py" << 'PYEOF'
 import socket
 import threading
@@ -26,7 +26,7 @@ RATE_BPS = 50 * 1024  # 50 KB/s
 CHUNK = 1024
 
 def forward(src, dst):
-    """ينقل البيانات بـ rate محدود."""
+    """Transfers data at a limited rate."""
     interval = CHUNK / RATE_BPS
     try:
         while True:
@@ -61,7 +61,7 @@ def handle(client):
             upstream.connect((host, port))
             client.sendall(b"HTTP/1.1 200 Connection Established\r\n\r\n")
 
-            # ابدأ النقل ثنائي الاتجاه بـ rate محدود
+            # Start bidirectional transfer with limited rate
             t1 = threading.Thread(target=forward, args=(client, upstream))
             t2 = threading.Thread(target=forward, args=(upstream, client))
             t1.start()
@@ -69,7 +69,7 @@ def handle(client):
             t1.join()
             t2.join()
         else:
-            # HTTP عادي
+            # Plain HTTP
             line = request.split(b"\r\n")[0].decode()
             url = line.split(" ")[1]
             if url.startswith("http://"):
@@ -114,17 +114,17 @@ PYEOF
     sleep 2
 
     if pgrep -f "throttle_proxy.py" > /dev/null; then
-        echo "  ✓ Proxy شغال على 127.0.0.1:$PROXY_PORT"
-        echo "  ✓ الحد: 50 KB/s"
+        echo "  ✓ Proxy running on 127.0.0.1:$PROXY_PORT"
+        echo "  ✓ limit: 50 KB/s"
     else
-        echo "  ✗ فشل"
+        echo "  ✗ failed"
         tail -5 "$PROXY_LOG"
     fi
 }
 
 # ═══ Stop ═══
 cmd_stop() {
-    echo "═══ إيقاف المحاكي ═══"
+    echo "═══ Stopping simulator ═══"
     pkill -9 -f "throttle_proxy.py" 2>/dev/null
     rm -f "$PROXY_PID_FILE"
     echo "  ✓"
@@ -132,64 +132,64 @@ cmd_stop() {
 
 # ═══ Test ═══
 cmd_test() {
-    echo "═══ اختبار تحت Throttle ═══"
+    echo "═══ Test under Throttle ═══"
     echo ""
 
     if ! pgrep -f "throttle_proxy.py" > /dev/null; then
-        echo "  ⚠️ شغّل: NETTHROTTLE start"
+        echo "  ⚠️ Run: NETTHROTTLE start"
         return
     fi
 
-    echo "🔴 اختبار 1: بدون proxy (سرعة حقيقية)"
+    echo "🔴 Test 1: without proxy (real speed)"
     SPEED1=$(curl -o /dev/null -s -w "%{speed_download}" --max-time 15 "https://speed.cloudflare.com/__down?bytes=500000" 2>/dev/null)
     python3 -c "print(f'    {${SPEED1:-0}/1024:.1f} KB/s')"
     echo ""
 
-    echo "🟡 اختبار 2: عبر Proxy (محاكي throttle)"
+    echo "🟡 Test 2: via Proxy (throttle simulator)"
     SPEED2=$(curl -x "http://127.0.0.1:$PROXY_PORT" -o /dev/null -s -w "%{speed_download}" --max-time 25 "https://speed.cloudflare.com/__down?bytes=500000" 2>/dev/null)
     python3 -c "print(f'    {${SPEED2:-0}/1024:.1f} KB/s')"
     echo ""
 
-    echo "🟢 اختبار 3: DNS تحت throttle"
+    echo "🟢 Test 3: DNS under throttle"
     if pgrep -f "floxin_dns.py" > /dev/null; then
         TIME=$( { /usr/bin/time -f "%e" dig @127.0.0.1 -p 5353 google.com +short > /dev/null; } 2>&1 )
-        echo "    DNS محلي: ${TIME}s"
+        echo "    local DNS: ${TIME}s"
     fi
     echo ""
 
     echo "═══════════════════════════════════════"
-    echo "  📊 النتيجة"
+    echo "  📊 The result"
     echo "═══════════════════════════════════════"
     python3 << PYEOF
 s1 = ${SPEED1:-0}
 s2 = ${SPEED2:-0}
-print(f"  سرعة حقيقية: {s1/1024:.1f} KB/s")
-print(f"  سرعة throttle: {s2/1024:.1f} KB/s")
+print(f"  Real speed: {s1/1024:.1f} KB/s")
+print(f"  Throttle speed: {s2/1024:.1f} KB/s")
 if s1 > 0 and s2 > 0:
     ratio = s1 / s2
-    print(f"  الفرق: {ratio:.1f}x")
+    print(f"  Difference: {ratio:.1f}x")
 PYEOF
 }
 
 # ═══ Help ═══
 cmd_help() {
     cat << EOF
-NETTHROTTLE — محاكي Throttle محلي
+NETTHROTTLE — local Throttle simulator
 
-  NETTHROTTLE start   → تشغيل proxy يحاكي Throttle (50 KB/s)
-  NETTHROTTLE stop    → إيقاف
-  NETTHROTTLE test    → اختبار تحت Throttle
-  NETTHROTTLE help    → المساعدة
+  NETTHROTTLE start   → Start proxy that simulates Throttle (50 KB/s)
+  NETTHROTTLE stop    → Stop
+  NETTHROTTLE test    → Test under Throttle
+  NETTHROTTLE help    → Help
 
-كيف تستخدمه:
+How to use it:
   1. NETTHROTTLE start
   2. export https_proxy=http://127.0.0.1:7777
-  3. شغّل أي أداة واختبرها
+  3. Run any tool and test it
   4. NETTHROTTLE test
   5. NETTHROTTLE stop
 
-⚠️ المحاكي يشتغل على level HTTP فقط
-   (مش بيحاكي throttle packets مثل WE)
+⚠️ Simulator works at HTTP level only
+   (does not simulate packet-level throttling like WE)
 EOF
 }
 
