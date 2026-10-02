@@ -1,4 +1,6 @@
 blocklist.txt
+!android/app/src/main/assets/blocklist.txt
+!android/app/src/main/assets/blocklist.sha256
 extra_*.txt
 *.log
 *.bak
@@ -10,3 +12,6 @@ __pycache__/
 .venv/
 .DS_Store
 !lib/.floxin_*.sh
+
+# Local build artifacts
+*.apk

@@ -35,6 +35,6 @@ class TermuxBridge(private val context: Context) {
         val client = OkHttpClient.Builder().addInterceptor(auth).build()
         return Retrofit.Builder().baseUrl("http://127.0.0.1:8080/").client(client).addConverterFactory(MoshiConverterFactory.create()).build().create(FloxinApi::class.java)
     }
-    @Provides @Singleton fun database(@ApplicationContext context: Context): FloxinDatabase = Room.databaseBuilder(context, FloxinDatabase::class.java, "floxin_cache.db").build()
+    @Provides @Singleton fun database(@ApplicationContext context: Context): FloxinDatabase = Room.databaseBuilder(context, FloxinDatabase::class.java, "floxin_cache.db").fallbackToDestructiveMigration().build()
     @Provides @Singleton fun termux(@ApplicationContext context: Context) = TermuxBridge(context)
 }

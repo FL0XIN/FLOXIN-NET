@@ -1,0 +1,172 @@
+[
+  {
+    "code": "1",
+    "real": "FAST",
+    "desc": "Fastest"
+  },
+  {
+    "code": "2",
+    "real": "SAVE",
+    "desc": "Save data"
+  },
+  {
+    "code": "3",
+    "real": "SAVE-WIFI",
+    "desc": "Save WiFi"
+  },
+  {
+    "code": "4",
+    "real": "SAVE-SIM",
+    "desc": "Save SIM"
+  },
+  {
+    "code": "5",
+    "real": "HIDE",
+    "desc": "Hide"
+  },
+  {
+    "code": "6",
+    "real": "VPN",
+    "desc": "VPN"
+  },
+  {
+    "code": "7",
+    "real": "ALL",
+    "desc": "Everything"
+  },
+  {
+    "code": "8",
+    "real": "SMART",
+    "desc": "Auto"
+  },
+  {
+    "code": "F",
+    "real": "FAST",
+    "desc": "Fastest"
+  },
+  {
+    "code": "S",
+    "real": "SAVE",
+    "desc": "Save"
+  },
+  {
+    "code": "W",
+    "real": "SAVE-WIFI",
+    "desc": "Save WiFi"
+  },
+  {
+    "code": "M",
+    "real": "SAVE-SIM",
+    "desc": "Save SIM"
+  },
+  {
+    "code": "H",
+    "real": "HIDE",
+    "desc": "Hide"
+  },
+  {
+    "code": "V",
+    "real": "VPN",
+    "desc": "VPN"
+  },
+  {
+    "code": "A",
+    "real": "ALL",
+    "desc": "All"
+  },
+  {
+    "code": "Z",
+    "real": "SMART",
+    "desc": "Auto"
+  },
+  {
+    "code": "EG",
+    "real": "BOOST-EG",
+    "desc": "Egypt fast"
+  },
+  {
+    "code": "EGS",
+    "real": "SAVE-EG",
+    "desc": "Egypt + save"
+  },
+  {
+    "code": "EGV",
+    "real": "SAVE-EG-VF",
+    "desc": "Vodafone + save"
+  },
+  {
+    "code": "EGE",
+    "real": "SAVE-EG",
+    "desc": "Etisalat + save"
+  },
+  {
+    "code": "B",
+    "real": "BOOST-EG",
+    "desc": "Boost"
+  },
+  {
+    "code": "BC",
+    "real": "BOOST-CF",
+    "desc": "Cloudflare"
+  },
+  {
+    "code": "BM",
+    "real": "BOOST-MAX",
+    "desc": "Max boost"
+  },
+  {
+    "code": "SM",
+    "real": "SAVE-MAX",
+    "desc": "Max save"
+  },
+  {
+    "code": "SA",
+    "real": "SAVE-ADG",
+    "desc": "AdGuard save"
+  },
+  {
+    "code": "AO",
+    "real": "ALMOST-OUT",
+    "desc": "Almost out"
+  },
+  {
+    "code": "RO",
+    "real": "RUNNING-OUT",
+    "desc": "Running out"
+  },
+  {
+    "code": "BL",
+    "real": "BLOCKED",
+    "desc": "Blocked"
+  },
+  {
+    "code": "TH",
+    "real": "THROTTLED",
+    "desc": "Throttled"
+  },
+  {
+    "code": "C",
+    "real": "CHECK",
+    "desc": "Check"
+  },
+  {
+    "code": "R",
+    "real": "RESET",
+    "desc": "Reset"
+  },
+  {
+    "code": "X",
+    "real": "STOP",
+    "desc": "Stop"
+  },
+  {
+    "code": "T",
+    "real": "STATUS",
+    "desc": "Status"
+  },
+  {
+    "code": "L",
+    "real": "LOG",
+    "desc": "History"
+  }
+]

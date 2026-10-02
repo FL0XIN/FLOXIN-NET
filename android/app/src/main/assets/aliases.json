@@ -1,0 +1,97 @@
+[
+  {
+    "alias": "FAST",
+    "scenario": "BOOST-EG",
+    "desc": "Internet slow? Fastest mode"
+  },
+  {
+    "alias": "SAVE",
+    "scenario": "SAVE-ADG",
+    "desc": "Save data (auto network)"
+  },
+  {
+    "alias": "SAVE-WIFI",
+    "scenario": "SAVE-WIFI",
+    "desc": "Save data on WiFi"
+  },
+  {
+    "alias": "SAVE-SIM",
+    "scenario": "SAVE-SIM",
+    "desc": "Save data on SIM"
+  },
+  {
+    "alias": "SAVE-MAX",
+    "scenario": "SAVE-MAX",
+    "desc": "Max save (strict block)"
+  },
+  {
+    "alias": "HIDE",
+    "scenario": "HIDE-MULLVAD",
+    "desc": "Hide from ISP (privacy)"
+  },
+  {
+    "alias": "ESCAPE",
+    "scenario": "VPN-AUTO",
+    "desc": "Escape blocking via VPN"
+  },
+  {
+    "alias": "VPN",
+    "scenario": "VPN-WARP",
+    "desc": "Cloudflare WARP VPN"
+  },
+  {
+    "alias": "ALL",
+    "scenario": "ALL-MAX",
+    "desc": "Everything (DNS + VPN + block)"
+  },
+  {
+    "alias": "SMART",
+    "scenario": "SMART",
+    "desc": "Auto everything"
+  },
+  {
+    "alias": "ALMOST-OUT",
+    "scenario": "SAVE-MAX",
+    "desc": "Network almost out — save max"
+  },
+  {
+    "alias": "RUNNING-OUT",
+    "scenario": "SAVE-SIM",
+    "desc": "Network running out on SIM"
+  },
+  {
+    "alias": "BLOCKED",
+    "scenario": "ESCAPE",
+    "desc": "ISP blocking you — escape"
+  },
+  {
+    "alias": "THROTTLED",
+    "scenario": "VPN-WARP",
+    "desc": "Throttled — bypass with VPN"
+  },
+  {
+    "alias": "CHECK",
+    "scenario": "CHECK",
+    "desc": "Check connection + status"
+  },
+  {
+    "alias": "RESET",
+    "scenario": "RESET",
+    "desc": "Reset to defaults"
+  },
+  {
+    "alias": "STOP",
+    "scenario": "STOP",
+    "desc": "Stop all"
+  },
+  {
+    "alias": "STATUS",
+    "scenario": "STATUS",
+    "desc": "Show status"
+  },
+  {
+    "alias": "LOG",
+    "scenario": "LOG",
+    "desc": "Show recent history"
+  }
+]

@@ -1,0 +1,392 @@
+[
+  {
+    "name": "Egypt-TEData",
+    "primary": "62.240.33.4",
+    "secondary": "62.240.33.5",
+    "region": "EG"
+  },
+  {
+    "name": "Egypt-Vodafone",
+    "primary": "163.121.128.134",
+    "secondary": "163.121.128.135",
+    "region": "EG"
+  },
+  {
+    "name": "Egypt-Etisalat",
+    "primary": "62.135.32.2",
+    "secondary": "62.135.32.3",
+    "region": "EG"
+  },
+  {
+    "name": "Egypt-Orange",
+    "primary": "62.135.32.2",
+    "secondary": "62.135.32.3",
+    "region": "EG"
+  },
+  {
+    "name": "Egypt-Link",
+    "primary": "196.221.1.1",
+    "secondary": "196.221.1.2",
+    "region": "EG"
+  },
+  {
+    "name": "Egypt-Noor",
+    "primary": "196.32.128.1",
+    "secondary": "196.32.128.2",
+    "region": "EG"
+  },
+  {
+    "name": "UAE-Etisalat",
+    "primary": "94.200.200.200",
+    "secondary": "94.200.200.201",
+    "region": "ME"
+  },
+  {
+    "name": "UAE-DU",
+    "primary": "94.200.200.100",
+    "secondary": "94.200.200.101",
+    "region": "ME"
+  },
+  {
+    "name": "Saudi-STC",
+    "primary": "212.118.116.1",
+    "secondary": "212.118.116.2",
+    "region": "ME"
+  },
+  {
+    "name": "Saudi-Mobily",
+    "primary": "212.118.116.10",
+    "secondary": "212.118.116.11",
+    "region": "ME"
+  },
+  {
+    "name": "Kuwait-Zain",
+    "primary": "62.150.24.1",
+    "secondary": "62.150.24.2",
+    "region": "ME"
+  },
+  {
+    "name": "Qatar-Ooredoo",
+    "primary": "212.77.192.1",
+    "secondary": "212.77.192.2",
+    "region": "ME"
+  },
+  {
+    "name": "Bahrain-Batelco",
+    "primary": "195.175.12.1",
+    "secondary": "195.175.12.2",
+    "region": "ME"
+  },
+  {
+    "name": "Oman-Omantu",
+    "primary": "85.154.16.1",
+    "secondary": "85.154.16.2",
+    "region": "ME"
+  },
+  {
+    "name": "Jordan-Orange",
+    "primary": "79.173.128.1",
+    "secondary": "79.173.128.2",
+    "region": "ME"
+  },
+  {
+    "name": "Germany-DFN",
+    "primary": "194.95.1.1",
+    "secondary": "194.95.1.2",
+    "region": "EU"
+  },
+  {
+    "name": "France-OVH",
+    "primary": "213.186.33.99",
+    "secondary": "213.186.33.100",
+    "region": "EU"
+  },
+  {
+    "name": "UK-BT",
+    "primary": "194.72.0.1",
+    "secondary": "194.72.0.2",
+    "region": "EU"
+  },
+  {
+    "name": "Netherlands-XS4ALL",
+    "primary": "195.121.1.1",
+    "secondary": "195.121.1.2",
+    "region": "EU"
+  },
+  {
+    "name": "Sweden-Telia",
+    "primary": "81.228.1.1",
+    "secondary": "81.228.1.2",
+    "region": "EU"
+  },
+  {
+    "name": "Italy-Telecom",
+    "primary": "85.37.1.1",
+    "secondary": "85.37.1.2",
+    "region": "EU"
+  },
+  {
+    "name": "Spain-Telefonica",
+    "primary": "80.58.1.1",
+    "secondary": "80.58.1.2",
+    "region": "EU"
+  },
+  {
+    "name": "Poland-Orange",
+    "primary": "194.204.1.1",
+    "secondary": "194.204.1.2",
+    "region": "EU"
+  },
+  {
+    "name": "US-Verizon",
+    "primary": "4.2.2.1",
+    "secondary": "4.2.2.2",
+    "region": "US"
+  },
+  {
+    "name": "US-ATT",
+    "primary": "12.127.16.1",
+    "secondary": "12.127.16.2",
+    "region": "US"
+  },
+  {
+    "name": "US-Level3",
+    "primary": "4.2.2.1",
+    "secondary": "4.2.2.2",
+    "region": "US"
+  },
+  {
+    "name": "US-Google2",
+    "primary": "8.8.8.8",
+    "secondary": "8.8.4.4",
+    "region": "US"
+  },
+  {
+    "name": "Japan-IIJ",
+    "primary": "202.32.1.1",
+    "secondary": "202.32.1.2",
+    "region": "ASIA"
+  },
+  {
+    "name": "Korea-KT",
+    "primary": "168.126.63.1",
+    "secondary": "168.126.63.2",
+    "region": "ASIA"
+  },
+  {
+    "name": "Singapore-StarHub",
+    "primary": "203.116.1.1",
+    "secondary": "203.116.1.2",
+    "region": "ASIA"
+  },
+  {
+    "name": "HongKong-HGC",
+    "primary": "203.80.1.1",
+    "secondary": "203.80.1.2",
+    "region": "ASIA"
+  },
+  {
+    "name": "Taiwan-HiNet",
+    "primary": "168.95.1.1",
+    "secondary": "168.95.1.2",
+    "region": "ASIA"
+  },
+  {
+    "name": "India-Jio",
+    "primary": "49.44.1.1",
+    "secondary": "49.44.1.2",
+    "region": "ASIA"
+  },
+  {
+    "name": "Cloudflare",
+    "primary": "1.1.1.1",
+    "secondary": "1.0.0.1",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "Cloudflare-Sec",
+    "primary": "1.1.1.2",
+    "secondary": "1.0.0.2",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "Cloudflare-Family",
+    "primary": "1.1.1.3",
+    "secondary": "1.0.0.3",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "Google",
+    "primary": "8.8.8.8",
+    "secondary": "8.8.4.4",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "Quad9",
+    "primary": "9.9.9.9",
+    "secondary": "149.112.112.112",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "Quad9-Sec",
+    "primary": "9.9.9.10",
+    "secondary": "149.112.112.10",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "AdGuard",
+    "primary": "94.140.14.14",
+    "secondary": "94.140.15.15",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "AdGuard-Family",
+    "primary": "94.140.14.15",
+    "secondary": "94.140.15.16",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "AdGuard-NoFilter",
+    "primary": "94.140.14.140",
+    "secondary": "94.140.14.141",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "OpenDNS",
+    "primary": "208.67.222.222",
+    "secondary": "208.67.220.220",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "OpenDNS-Family",
+    "primary": "208.67.222.123",
+    "secondary": "208.67.220.123",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "Mullvad",
+    "primary": "194.242.2.2",
+    "secondary": "194.242.2.3",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "DNS-SB",
+    "primary": "185.222.222.222",
+    "secondary": "45.11.45.11",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "CleanBrowsing",
+    "primary": "185.228.168.9",
+    "secondary": "185.228.169.9",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "CleanBrowsing-Family",
+    "primary": "185.228.168.168",
+    "secondary": "185.228.169.168",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "CleanBrowsing-Adult",
+    "primary": "185.228.168.10",
+    "secondary": "185.228.169.11",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "NextDNS",
+    "primary": "45.90.28.0",
+    "secondary": "45.90.30.0",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "Comodo",
+    "primary": "8.26.56.26",
+    "secondary": "8.20.247.20",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "Yandex",
+    "primary": "77.88.8.8",
+    "secondary": "77.88.8.1",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "Yandex-Family",
+    "primary": "77.88.8.7",
+    "secondary": "77.88.8.3",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "DNS0-EU",
+    "primary": "193.110.81.0",
+    "secondary": "185.253.5.0",
+    "region": "EU"
+  },
+  {
+    "name": "Foundation",
+    "primary": "198.101.242.72",
+    "secondary": "198.101.242.73",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "Njalla",
+    "primary": "95.215.19.53",
+    "secondary": "95.215.19.54",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "LibreDNS",
+    "primary": "116.202.176.26",
+    "secondary": "116.202.176.27",
+    "region": "EU"
+  },
+  {
+    "name": "Cisco-Umbrella",
+    "primary": "208.67.222.222",
+    "secondary": "208.67.220.220",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "Fortinet",
+    "primary": "208.91.112.52",
+    "secondary": "208.91.112.53",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "Neustar",
+    "primary": "156.154.70.1",
+    "secondary": "156.154.71.1",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "Hurricane",
+    "primary": "74.82.42.42",
+    "secondary": "74.82.42.43",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "Verisign",
+    "primary": "64.6.64.6",
+    "secondary": "64.6.65.6",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "SafeDNS",
+    "primary": "195.46.39.39",
+    "secondary": "195.46.39.40",
+    "region": "GLOBAL"
+  },
+  {
+    "name": "Alternate",
+    "primary": "193.19.108.2",
+    "secondary": "193.19.108.3",
+    "region": "EU"
+  },
+  {
+    "name": "DNSWatch",
+    "primary": "84.200.69.80",
+    "secondary": "84.200.70.40",
+    "region": "EU"
+  }
+]

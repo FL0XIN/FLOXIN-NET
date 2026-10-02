@@ -1,0 +1,362 @@
+[
+  {
+    "code": "SAVE-EG",
+    "type": "SAVE",
+    "provider": "Egypt-TEData",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "",
+    "desc": "Save + Egypt server"
+  },
+  {
+    "code": "SAVE-EG-VF",
+    "type": "SAVE",
+    "provider": "Egypt-Vodafone",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "",
+    "desc": "Save + Vodafone"
+  },
+  {
+    "code": "SAVE-ADG",
+    "type": "SAVE",
+    "provider": "AdGuard",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "",
+    "desc": "Save + AdGuard block"
+  },
+  {
+    "code": "SAVE-MAX",
+    "type": "SAVE",
+    "provider": "AdGuard",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "blocklist=strict,cache=big",
+    "desc": "Max save (strict)"
+  },
+  {
+    "code": "SAVE-WIFI",
+    "type": "SAVE",
+    "provider": "AdGuard",
+    "net": "WIFI",
+    "vpn": "NONE",
+    "opts": "",
+    "desc": "Save on WiFi"
+  },
+  {
+    "code": "SAVE-SIM",
+    "type": "SAVE",
+    "provider": "Egypt-TEData",
+    "net": "SIM",
+    "vpn": "NONE",
+    "opts": "",
+    "desc": "Save on SIM"
+  },
+  {
+    "code": "SAVE-FAMILY",
+    "type": "SAVE",
+    "provider": "AdGuard-Family",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "",
+    "desc": "Family safe + save"
+  },
+  {
+    "code": "BOOST-EG",
+    "type": "BOOST",
+    "provider": "Egypt-TEData",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "",
+    "desc": "Fastest Egypt"
+  },
+  {
+    "code": "BOOST-EG-VF",
+    "type": "BOOST",
+    "provider": "Egypt-Vodafone",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "",
+    "desc": "Vodafone fastest"
+  },
+  {
+    "code": "BOOST-EG-ET",
+    "type": "BOOST",
+    "provider": "Egypt-Etisalat",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "",
+    "desc": "Etisalat fastest"
+  },
+  {
+    "code": "BOOST-EG-OR",
+    "type": "BOOST",
+    "provider": "Egypt-Orange",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "",
+    "desc": "Orange fastest"
+  },
+  {
+    "code": "BOOST-CF",
+    "type": "BOOST",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "",
+    "desc": "Global fastest"
+  },
+  {
+    "code": "BOOST-MAX",
+    "type": "BOOST",
+    "provider": "Egypt-TEData",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "cache=big,ttl=high",
+    "desc": "Ultra speed"
+  },
+  {
+    "code": "BOOST-ME",
+    "type": "BOOST",
+    "provider": "UAE-Etisalat",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "",
+    "desc": "Middle East fast"
+  },
+  {
+    "code": "HIDE-MULLVAD",
+    "type": "HIDE",
+    "provider": "Mullvad",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "",
+    "desc": "No-log privacy"
+  },
+  {
+    "code": "HIDE-NJALLA",
+    "type": "HIDE",
+    "provider": "Njalla",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "",
+    "desc": "Njalla private"
+  },
+  {
+    "code": "HIDE-DNS0",
+    "type": "HIDE",
+    "provider": "DNS0-EU",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "",
+    "desc": "DNS0.eu privacy"
+  },
+  {
+    "code": "HIDE-LIBRE",
+    "type": "HIDE",
+    "provider": "LibreDNS",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "",
+    "desc": "LibreDNS"
+  },
+  {
+    "code": "HIDE-SB",
+    "type": "HIDE",
+    "provider": "DNS-SB",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "",
+    "desc": "DNS.SB"
+  },
+  {
+    "code": "HIDE-ESCAPE",
+    "type": "HIDE",
+    "provider": "Mullvad",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "cache=off",
+    "desc": "Escape ISP tracking"
+  },
+  {
+    "code": "HIDE-VPN",
+    "type": "HIDE",
+    "provider": "Mullvad",
+    "net": "AUTO",
+    "vpn": "WARP",
+    "opts": "",
+    "desc": "Privacy + WARP"
+  },
+  {
+    "code": "BLOCK-ADS",
+    "type": "BLOCK",
+    "provider": "AdGuard",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "",
+    "desc": "Ads + trackers only"
+  },
+  {
+    "code": "BLOCK-STRICT",
+    "type": "BLOCK",
+    "provider": "AdGuard",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "blocklist=strict",
+    "desc": "Strict block"
+  },
+  {
+    "code": "BLOCK-MAL",
+    "type": "BLOCK",
+    "provider": "Quad9-Sec",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "",
+    "desc": "Malware block"
+  },
+  {
+    "code": "BLOCK-ADULT",
+    "type": "BLOCK",
+    "provider": "CleanBrowsing-Adult",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "",
+    "desc": "Adult content block"
+  },
+  {
+    "code": "BLOCK-ALL",
+    "type": "BLOCK",
+    "provider": "AdGuard",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "blocklist=strict,log=off",
+    "desc": "Block all"
+  },
+  {
+    "code": "VPN-WARP",
+    "type": "VPN",
+    "provider": "NONE",
+    "net": "AUTO",
+    "vpn": "WARP",
+    "opts": "",
+    "desc": "Cloudflare WARP (fast)"
+  },
+  {
+    "code": "VPN-PSIPHON",
+    "type": "VPN",
+    "provider": "NONE",
+    "net": "AUTO",
+    "vpn": "PSIPHON",
+    "opts": "",
+    "desc": "Psiphon (bypass)"
+  },
+  {
+    "code": "VPN-AUTO",
+    "type": "VPN",
+    "provider": "NONE",
+    "net": "AUTO",
+    "vpn": "AUTO",
+    "opts": "",
+    "desc": "Auto pick VPN"
+  },
+  {
+    "code": "VPN-WARP-WIFI",
+    "type": "VPN",
+    "provider": "NONE",
+    "net": "WIFI",
+    "vpn": "WARP",
+    "opts": "",
+    "desc": "WARP on WiFi"
+  },
+  {
+    "code": "VPN-WARP-SIM",
+    "type": "VPN",
+    "provider": "NONE",
+    "net": "SIM",
+    "vpn": "WARP",
+    "opts": "",
+    "desc": "WARP on SIM"
+  },
+  {
+    "code": "VPN-PSIPHON-SIM",
+    "type": "VPN",
+    "provider": "NONE",
+    "net": "SIM",
+    "vpn": "PSIPHON",
+    "opts": "",
+    "desc": "Psiphon on SIM"
+  },
+  {
+    "code": "ALL-EG",
+    "type": "ALL",
+    "provider": "Egypt-TEData",
+    "net": "AUTO",
+    "vpn": "WARP",
+    "opts": "",
+    "desc": "Egypt + Block + WARP"
+  },
+  {
+    "code": "ALL-CF",
+    "type": "ALL",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "vpn": "WARP",
+    "opts": "",
+    "desc": "Cloudflare + Block + WARP"
+  },
+  {
+    "code": "ALL-MAX",
+    "type": "ALL",
+    "provider": "Egypt-TEData",
+    "net": "AUTO",
+    "vpn": "WARP",
+    "opts": "blocklist=strict,cache=big",
+    "desc": "Ultimate"
+  },
+  {
+    "code": "ALL-WIFI",
+    "type": "ALL",
+    "provider": "Egypt-TEData",
+    "net": "WIFI",
+    "vpn": "WARP",
+    "opts": "",
+    "desc": "Full on WiFi"
+  },
+  {
+    "code": "ALL-SIM",
+    "type": "ALL",
+    "provider": "Egypt-TEData",
+    "net": "SIM",
+    "vpn": "WARP",
+    "opts": "",
+    "desc": "Full on SIM"
+  },
+  {
+    "code": "SMART",
+    "type": "SMART",
+    "provider": "AUTO",
+    "net": "AUTO",
+    "vpn": "AUTO",
+    "opts": "",
+    "desc": "Auto everything"
+  },
+  {
+    "code": "SMART-SAVE",
+    "type": "SMART",
+    "provider": "AUTO",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "blocklist=strict",
+    "desc": "Smart save"
+  },
+  {
+    "code": "SMART-BOOST",
+    "type": "SMART",
+    "provider": "AUTO",
+    "net": "AUTO",
+    "vpn": "NONE",
+    "opts": "cache=big",
+    "desc": "Smart boost"
+  }
+]

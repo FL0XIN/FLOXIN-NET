@@ -1,0 +1,802 @@
+[
+  {
+    "code": "FLOX-EG",
+    "mode": "BOOSTER",
+    "provider": "Egypt-TEData",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Egypt local fastest"
+  },
+  {
+    "code": "FLOX-EG-TE",
+    "mode": "BOOSTER",
+    "provider": "Egypt-TEData",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "TE Data fast"
+  },
+  {
+    "code": "FLOX-EG-VF",
+    "mode": "BOOSTER",
+    "provider": "Egypt-Vodafone",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Vodafone fast"
+  },
+  {
+    "code": "FLOX-EG-ET",
+    "mode": "BOOSTER",
+    "provider": "Egypt-Etisalat",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Etisalat fast"
+  },
+  {
+    "code": "FLOX-EG-OR",
+    "mode": "BOOSTER",
+    "provider": "Egypt-Orange",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Orange fast"
+  },
+  {
+    "code": "FLOX-EG-LINK",
+    "mode": "BOOSTER",
+    "provider": "Egypt-Link",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Link DSL"
+  },
+  {
+    "code": "FLOX-EG-NOOR",
+    "mode": "BOOSTER",
+    "provider": "Egypt-Noor",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Noor DSL"
+  },
+  {
+    "code": "FLOX-EG-SAVE",
+    "mode": "DATA_SAVER",
+    "provider": "Egypt-TEData",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Egypt + ad block"
+  },
+  {
+    "code": "FLOX-EG-2X1",
+    "mode": "2X1",
+    "provider": "Egypt-TEData",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Egypt dual"
+  },
+  {
+    "code": "FLOX-EG-MAX",
+    "mode": "BOOSTER",
+    "provider": "Egypt-TEData",
+    "net": "AUTO",
+    "opts": "cache=big,ttl=high",
+    "desc": "Max speed"
+  },
+  {
+    "code": "FLOX-ME",
+    "mode": "BOOSTER",
+    "provider": "UAE-Etisalat",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Middle East fast"
+  },
+  {
+    "code": "FLOX-UAE",
+    "mode": "BOOSTER",
+    "provider": "UAE-Etisalat",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "UAE Etisalat"
+  },
+  {
+    "code": "FLOX-UAE-DU",
+    "mode": "BOOSTER",
+    "provider": "UAE-DU",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "UAE DU"
+  },
+  {
+    "code": "FLOX-SA",
+    "mode": "BOOSTER",
+    "provider": "Saudi-STC",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Saudi STC"
+  },
+  {
+    "code": "FLOX-SA-MOB",
+    "mode": "BOOSTER",
+    "provider": "Saudi-Mobily",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Saudi Mobily"
+  },
+  {
+    "code": "FLOX-KW",
+    "mode": "BOOSTER",
+    "provider": "Kuwait-Zain",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Kuwait Zain"
+  },
+  {
+    "code": "FLOX-QA",
+    "mode": "BOOSTER",
+    "provider": "Qatar-Ooredoo",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Qatar"
+  },
+  {
+    "code": "FLOX-ME-SAVE",
+    "mode": "DATA_SAVER",
+    "provider": "UAE-Etisalat",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "ME + ad block"
+  },
+  {
+    "code": "FLOX-GLOBAL",
+    "mode": "BOOSTER",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Cloudflare balanced"
+  },
+  {
+    "code": "FLOX-CF",
+    "mode": "BOOSTER",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Cloudflare"
+  },
+  {
+    "code": "FLOX-CF-SEC",
+    "mode": "DATA_SAVER",
+    "provider": "Cloudflare-Sec",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Cloudflare Security"
+  },
+  {
+    "code": "FLOX-CF-FAM",
+    "mode": "DATA_SAVER",
+    "provider": "Cloudflare-Family",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Cloudflare Family"
+  },
+  {
+    "code": "FLOX-GG",
+    "mode": "BOOSTER",
+    "provider": "Google",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Google DNS"
+  },
+  {
+    "code": "FLOX-QUAD9",
+    "mode": "BOOSTER",
+    "provider": "Quad9",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Quad9"
+  },
+  {
+    "code": "FLOX-QUAD9-SEC",
+    "mode": "DATA_SAVER",
+    "provider": "Quad9-Sec",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Quad9 Security"
+  },
+  {
+    "code": "FLOX-ADG",
+    "mode": "DATA_SAVER",
+    "provider": "AdGuard",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "AdGuard max block"
+  },
+  {
+    "code": "FLOX-ADG-FAM",
+    "mode": "DATA_SAVER",
+    "provider": "AdGuard-Family",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "AdGuard Family"
+  },
+  {
+    "code": "FLOX-ADG-NF",
+    "mode": "BOOSTER",
+    "provider": "AdGuard-NoFilter",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "AdGuard no filter"
+  },
+  {
+    "code": "FLOX-OPENDNS",
+    "mode": "DATA_SAVER",
+    "provider": "OpenDNS",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "OpenDNS"
+  },
+  {
+    "code": "FLOX-OPENDNS-FAM",
+    "mode": "DATA_SAVER",
+    "provider": "OpenDNS-Family",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "OpenDNS Family"
+  },
+  {
+    "code": "FLOX-CLEAN",
+    "mode": "DATA_SAVER",
+    "provider": "CleanBrowsing",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "CleanBrowsing"
+  },
+  {
+    "code": "FLOX-CLEAN-FAM",
+    "mode": "DATA_SAVER",
+    "provider": "CleanBrowsing-Family",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "CleanBrowsing Family"
+  },
+  {
+    "code": "FLOX-CLEAN-AD",
+    "mode": "DATA_SAVER",
+    "provider": "CleanBrowsing-Adult",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Block adult"
+  },
+  {
+    "code": "FLOX-ESCAPE",
+    "mode": "2X1",
+    "provider": "Mullvad",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Bypass ISP blocking"
+  },
+  {
+    "code": "FLOX-STEALTH",
+    "mode": "BOOSTER",
+    "provider": "Mullvad",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "No-log privacy"
+  },
+  {
+    "code": "FLOX-NJALLA",
+    "mode": "BOOSTER",
+    "provider": "Njalla",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Njalla private"
+  },
+  {
+    "code": "FLOX-DNS-SB",
+    "mode": "BOOSTER",
+    "provider": "DNS-SB",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "DNS.SB privacy"
+  },
+  {
+    "code": "FLOX-LIBRE",
+    "mode": "BOOSTER",
+    "provider": "LibreDNS",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "LibreDNS"
+  },
+  {
+    "code": "FLOX-DNS0",
+    "mode": "BOOSTER",
+    "provider": "DNS0-EU",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "DNS0.eu privacy"
+  },
+  {
+    "code": "FLOX-FOUND",
+    "mode": "BOOSTER",
+    "provider": "Foundation",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Foundation DNS"
+  },
+  {
+    "code": "FLOX-SAFE",
+    "mode": "DATA_SAVER",
+    "provider": "SafeDNS",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "SafeDNS filter"
+  },
+  {
+    "code": "FLOX-SECURE",
+    "mode": "DATA_SAVER",
+    "provider": "Quad9-Sec",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Malware block"
+  },
+  {
+    "code": "FLOX-CISCO",
+    "mode": "DATA_SAVER",
+    "provider": "Cisco-Umbrella",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Cisco Umbrella"
+  },
+  {
+    "code": "FLOX-FORTI",
+    "mode": "DATA_SAVER",
+    "provider": "Fortinet",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Fortinet security"
+  },
+  {
+    "code": "FLOX-NEUSTAR",
+    "mode": "DATA_SAVER",
+    "provider": "Neustar",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Neustar security"
+  },
+  {
+    "code": "FLOX-HURR",
+    "mode": "BOOSTER",
+    "provider": "Hurricane",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Hurricane Electric"
+  },
+  {
+    "code": "FLOX-VERISIGN",
+    "mode": "DATA_SAVER",
+    "provider": "Verisign",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Verisign"
+  },
+  {
+    "code": "FLOX-DNSWATCH",
+    "mode": "DATA_SAVER",
+    "provider": "DNSWatch",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "DNSWatch"
+  },
+  {
+    "code": "FLOX-ALTERNATE",
+    "mode": "BOOSTER",
+    "provider": "Alternate",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Alternate DNS"
+  },
+  {
+    "code": "FLOX-EU",
+    "mode": "BOOSTER",
+    "provider": "DNS0-EU",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "EU nearby"
+  },
+  {
+    "code": "FLOX-DE",
+    "mode": "BOOSTER",
+    "provider": "Germany-DFN",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Germany DFN"
+  },
+  {
+    "code": "FLOX-FR",
+    "mode": "BOOSTER",
+    "provider": "France-OVH",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "France OVH"
+  },
+  {
+    "code": "FLOX-UK",
+    "mode": "BOOSTER",
+    "provider": "UK-BT",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "UK BT"
+  },
+  {
+    "code": "FLOX-NL",
+    "mode": "BOOSTER",
+    "provider": "Netherlands-XS4ALL",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Netherlands"
+  },
+  {
+    "code": "FLOX-SE",
+    "mode": "BOOSTER",
+    "provider": "Sweden-Telia",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Sweden Telia"
+  },
+  {
+    "code": "FLOX-IT",
+    "mode": "BOOSTER",
+    "provider": "Italy-Telecom",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Italy Telecom"
+  },
+  {
+    "code": "FLOX-ES",
+    "mode": "BOOSTER",
+    "provider": "Spain-Telefonica",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Spain Telefonica"
+  },
+  {
+    "code": "FLOX-US",
+    "mode": "BOOSTER",
+    "provider": "US-Verizon",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "US Verizon"
+  },
+  {
+    "code": "FLOX-VZ",
+    "mode": "BOOSTER",
+    "provider": "US-Verizon",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Verizon"
+  },
+  {
+    "code": "FLOX-ATT",
+    "mode": "BOOSTER",
+    "provider": "US-ATT",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "AT&T"
+  },
+  {
+    "code": "FLOX-L3",
+    "mode": "BOOSTER",
+    "provider": "US-Level3",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Level3"
+  },
+  {
+    "code": "FLOX-US-SAVE",
+    "mode": "DATA_SAVER",
+    "provider": "US-Level3",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "US + ad block"
+  },
+  {
+    "code": "FLOX-ASIA",
+    "mode": "BOOSTER",
+    "provider": "Singapore-StarHub",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Asia nearby"
+  },
+  {
+    "code": "FLOX-JP",
+    "mode": "BOOSTER",
+    "provider": "Japan-IIJ",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Japan IIJ"
+  },
+  {
+    "code": "FLOX-KR",
+    "mode": "BOOSTER",
+    "provider": "Korea-KT",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Korea KT"
+  },
+  {
+    "code": "FLOX-SG",
+    "mode": "BOOSTER",
+    "provider": "Singapore-StarHub",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Singapore"
+  },
+  {
+    "code": "FLOX-HK",
+    "mode": "BOOSTER",
+    "provider": "HongKong-HGC",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Hong Kong"
+  },
+  {
+    "code": "FLOX-TW",
+    "mode": "BOOSTER",
+    "provider": "Taiwan-HiNet",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Taiwan HiNet"
+  },
+  {
+    "code": "FLOX-IN",
+    "mode": "BOOSTER",
+    "provider": "India-Jio",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "India Jio"
+  },
+  {
+    "code": "FLOX-BOOST",
+    "mode": "BOOSTER",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Pure speed"
+  },
+  {
+    "code": "FLOX-SAVE",
+    "mode": "DATA_SAVER",
+    "provider": "AdGuard",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Max data save"
+  },
+  {
+    "code": "FLOX-2X1",
+    "mode": "2X1",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Dual mode"
+  },
+  {
+    "code": "FLOX-ULTRA-SAVE",
+    "mode": "DATA_SAVER",
+    "provider": "AdGuard",
+    "net": "AUTO",
+    "opts": "blocklist=strict,cache=big",
+    "desc": "Ultra data saver"
+  },
+  {
+    "code": "FLOX-ULTRA-BOOST",
+    "mode": "BOOSTER",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "cache=big,ttl=high",
+    "desc": "Ultra speed"
+  },
+  {
+    "code": "FLOX-SILENT",
+    "mode": "BOOSTER",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "log=off",
+    "desc": "No logging"
+  },
+  {
+    "code": "FLOX-VERBOSE",
+    "mode": "DATA_SAVER",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "log=on",
+    "desc": "Detailed logging"
+  },
+  {
+    "code": "FLOX-NO-CACHE",
+    "mode": "BOOSTER",
+    "provider": "Google",
+    "net": "AUTO",
+    "opts": "cache=off",
+    "desc": "No DNS cache"
+  },
+  {
+    "code": "FLOX-CACHE-BIG",
+    "mode": "BOOSTER",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "cache=big",
+    "desc": "Large cache"
+  },
+  {
+    "code": "FLOX-CACHE-OFF",
+    "mode": "BOOSTER",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "cache=off",
+    "desc": "No cache"
+  },
+  {
+    "code": "FLOX-TTL-HIGH",
+    "mode": "BOOSTER",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "ttl=high",
+    "desc": "Long TTL"
+  },
+  {
+    "code": "FLOX-TTL-LOW",
+    "mode": "BOOSTER",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "ttl=low",
+    "desc": "Short TTL"
+  },
+  {
+    "code": "FLOX-LOG-OFF",
+    "mode": "BOOSTER",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "log=off",
+    "desc": "Disable log"
+  },
+  {
+    "code": "FLOX-LOG-ON",
+    "mode": "DATA_SAVER",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "log=on",
+    "desc": "Enable log"
+  },
+  {
+    "code": "FLOX-STRICT",
+    "mode": "DATA_SAVER",
+    "provider": "AdGuard",
+    "net": "AUTO",
+    "opts": "blocklist=strict",
+    "desc": "Strict blocklist"
+  },
+  {
+    "code": "FLOX-CHILL",
+    "mode": "DATA_SAVER",
+    "provider": "AdGuard",
+    "net": "AUTO",
+    "opts": "blocklist=light",
+    "desc": "Light blocklist"
+  },
+  {
+    "code": "FLOX-LOW-LATENCY",
+    "mode": "BOOSTER",
+    "provider": "Egypt-TEData",
+    "net": "AUTO",
+    "opts": "cache=big,ttl=low",
+    "desc": "Low latency"
+  },
+  {
+    "code": "FLOX-HIGH-THRU",
+    "mode": "BOOSTER",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "cache=big,ttl=high",
+    "desc": "High throughput"
+  },
+  {
+    "code": "FLOX-WIFI",
+    "mode": "BOOSTER",
+    "provider": "Cloudflare",
+    "net": "WIFI",
+    "opts": "",
+    "desc": "WiFi mode"
+  },
+  {
+    "code": "FLOX-SIM",
+    "mode": "BOOSTER",
+    "provider": "Egypt-TEData",
+    "net": "SIM",
+    "opts": "",
+    "desc": "SIM mode"
+  },
+  {
+    "code": "FLOX-BOTH",
+    "mode": "BOOSTER",
+    "provider": "Cloudflare",
+    "net": "BOTH",
+    "opts": "",
+    "desc": "WiFi + SIM"
+  },
+  {
+    "code": "FLOX-WIFI-SAVE",
+    "mode": "DATA_SAVER",
+    "provider": "AdGuard",
+    "net": "WIFI",
+    "opts": "",
+    "desc": "WiFi + save"
+  },
+  {
+    "code": "FLOX-SIM-SAVE",
+    "mode": "DATA_SAVER",
+    "provider": "Egypt-TEData",
+    "net": "SIM",
+    "opts": "",
+    "desc": "SIM + save"
+  },
+  {
+    "code": "FLOX-BOTH-SAVE",
+    "mode": "DATA_SAVER",
+    "provider": "AdGuard",
+    "net": "BOTH",
+    "opts": "",
+    "desc": "Both + save"
+  },
+  {
+    "code": "FLOX-DOCTOR",
+    "mode": "BOOSTER",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Run doctor"
+  },
+  {
+    "code": "FLOX-PANIC",
+    "mode": "BOOSTER",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Emergency reset"
+  },
+  {
+    "code": "FLOX-MONITOR",
+    "mode": "BOOSTER",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Live monitor"
+  },
+  {
+    "code": "FLOX-TEST",
+    "mode": "BOOSTER",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Full test"
+  },
+  {
+    "code": "FLOX-SWITCH",
+    "mode": "BOOSTER",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Auto-switch"
+  },
+  {
+    "code": "FLOX-SCAN",
+    "mode": "BOOSTER",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Port scan"
+  },
+  {
+    "code": "FLOX-STATUS",
+    "mode": "BOOSTER",
+    "provider": "Cloudflare",
+    "net": "AUTO",
+    "opts": "",
+    "desc": "Status only"
+  }
+]
