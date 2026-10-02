@@ -2,7 +2,7 @@
 
 ## Scope
 
-This report covers the supplied Termux implementation and the 1.1.0 revision. The existing commands and modules were retained; the installer, runtime portability, DNS binding defaults, documentation, and smoke tests were updated.
+This report covers the supplied Android-terminal implementation and the 1.1.0 revision. The existing commands and modules were retained; the installer, runtime portability, DNS binding defaults, documentation, and smoke tests were updated.
 
 ## Strengths
 
@@ -10,7 +10,7 @@ The project has a clear command-oriented structure: `bin/` contains user-facing 
 
 ## Weaknesses found
 
-The original installer was Termux-only, did not deploy the project files into the runtime directories, assumed `pkg`, and installed Python dependencies through only one pip path. It also added auto-start code without a platform check. The original resolver always used port 5353 but attempted to bind all interfaces, and the scripts used hard-coded Termux shebangs and many hard-coded paths. Some advertised commands and checks depend on utilities that may not exist on non-Termux systems.
+The original installer was Android-only, did not deploy the project files into the runtime directories, assumed `pkg`, and installed Python dependencies through only one pip path. It also added auto-start code without a platform check. The original resolver always used port 5353 but attempted to bind all interfaces, and the scripts used hard-coded Android shebangs and many hard-coded paths. Some advertised commands and checks depend on utilities that may not exist on non-Android systems.
 
 The original `FLOXIN` and helper scripts use `pgrep -f` and `pkill -f` patterns. Those patterns can match an unrelated process with the same text. Provider selection edits Python source in place, and some commands download remote data without cryptographic pinning or an integrity check. The test claim of 22/22 was not independently reproducible from the supplied package because no test suite or blocklist was included.
 
@@ -22,8 +22,8 @@ The emergency and manager commands force-kill processes. In the original version
 
 ## Changes in 1.1.0
 
-The revised installer detects Termux, Linux, macOS, WSL, Docker, and proot-distro; identifies the package manager; reports architecture, RAM, free disk, root, sudo, and proot; supports package-install fallback paths for pip; and deploys the existing project files. `setup.sh`, `uninstall.sh`, `update.sh`, documentation, MIT licensing, CI, and smoke tests were added. The resolver now reads `FLOXIN_PORT` and `FLOXIN_BIND_ADDRESS`, with `127.0.0.1:5353` as the safe default.
+The revised installer detects Android, Linux, macOS, WSL, Docker, and proot-distro; identifies the package manager; reports architecture, RAM, free disk, root, sudo, and proot; supports package-install fallback paths for pip; and deploys the existing project files. `setup.sh`, `uninstall.sh`, `update.sh`, documentation, MIT licensing, CI, and smoke tests were added. The resolver now reads `FLOXIN_PORT` and `FLOXIN_BIND_ADDRESS`, with `127.0.0.1:5353` as the safe default.
 
 ## Validation
 
-The local checks passed: all Bash files passed `bash -n`, the Python resolver passed AST/bytecode syntax checks, and installer checks passed. Full functional DNS and blocklist tests require `dnslib`, a downloaded blocklist, and a network-capable runtime such as Termux or Linux with the listed dependencies.
+The local checks passed: all Bash files passed `bash -n`, the Python resolver passed AST/bytecode syntax checks, and installer checks passed. Full functional DNS and blocklist tests require `dnslib`, a downloaded blocklist, and a network-capable runtime such as Android or Linux with the listed dependencies.

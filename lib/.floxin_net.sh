@@ -100,13 +100,13 @@ export -f floxin_start_bg floxin_stop floxin_net floxin_switch floxin_wehack
 # FLOXIN NET environment detection helpers.
 # Sourced by the installer and the interactive shell.
 
-floxin_is_termux() { [ -d /data/data/com.termux ] || [[ "${PREFIX:-}" == /data/data/com.termux/* ]]; }
+floxin_is_android_env() { [ -d /data/data/com.termux ] || [[ "${PREFIX:-}" == /data/data/com.termux/* ]]; }
 floxin_is_wsl() { grep -qiE 'microsoft|wsl' /proc/version 2>/dev/null; }
 floxin_is_docker() { [ -f /.dockerenv ] || grep -qaE 'docker|containerd' /proc/1/cgroup 2>/dev/null; }
 floxin_is_proot() { command -v proot >/dev/null 2>&1 || [ -n "${PROOT_DISTRO:-}" ] || grep -qi proot /proc/$$/cmdline 2>/dev/null; }
 
 floxin_os_name() {
-    if floxin_is_termux; then echo "Termux"; return; fi
+    if floxin_is_android_env; then echo "Android"; return; fi
     if [ "$(uname -s 2>/dev/null)" = "Darwin" ]; then echo "macOS"; return; fi
     if floxin_is_wsl; then echo "WSL"; return; fi
     if floxin_is_docker; then echo "Docker"; return; fi
@@ -116,7 +116,7 @@ floxin_os_name() {
 }
 
 floxin_package_manager() {
-    if floxin_is_termux && command -v pkg >/dev/null 2>&1; then echo pkg; return; fi
+    if floxin_is_android_env && command -v pkg >/dev/null 2>&1; then echo pkg; return; fi
     for pm in apt-get apt pacman dnf apk brew; do
         command -v "$pm" >/dev/null 2>&1 && { echo "$pm"; return; }
     done

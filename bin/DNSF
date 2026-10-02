@@ -109,7 +109,7 @@ cmd_vpn() {
         echo "  الحل:"
         echo "  - للـ DNS فقط: اقفل الـ VPN"
         echo "  - للـ VPN فقط: DNSF stop ثم افتح VPN"
-        echo "  - للاتنين: مفيش حل على Termux"
+        echo "  - للاتنين: مفيش حل على Android"
     else
         echo "═══════════════════════════════════════"
         echo "  ✓ مفيش تعارض"

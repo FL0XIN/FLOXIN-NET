@@ -1,6 +1,6 @@
 # Contributing
 
-1. Keep the existing Termux commands working.
+1. Keep the existing commands working across supported platforms.
 2. Test Bash syntax with `bash -n` and Python syntax with `python3 -m py_compile`.
 3. Do not commit blocklists, logs, personal configuration, or backup files.
 4. Keep network downloads explicit, bounded by timeouts, and documented.

@@ -1,6 +1,6 @@
 # FLOXIN NET
 
-FLOXIN NET is a local DNS utility for Termux and Unix-like systems. The existing FLOXIN command shell remains the primary interface, while this revision adds automatic environment detection and a portable installer.
+FLOXIN NET is a cross-platform local DNS utility for Linux, macOS, Android terminals, WSL, Docker, and proot environments. The FLOXIN command shell is the primary interface, and the installer auto-detects the host environment.
 
 ## What it does
 
@@ -10,7 +10,7 @@ The project can run a local DNS resolver with caching and an optional StevenBlac
 
 ## Supported environments
 
-The installer detects Termux/Android, Ubuntu/Debian, Arch, Fedora, Alpine, macOS, WSL, Docker, and proot-distro. It reports the OS, kernel, architecture, available RAM, free disk, package manager, root, sudo, and proot availability.
+The installer detects Android terminals, Ubuntu/Debian, Arch, Fedora, Alpine, macOS, WSL, Docker, and proot-distro. It reports the OS, kernel, architecture, available RAM, free disk, package manager, root, sudo, and proot availability.
 
 The safe default is `127.0.0.1:5353`, which requires no root. Advanced users may set `FLOXIN_PORT` and `FLOXIN_BIND_ADDRESS`; exposing a DNS service beyond localhost should only be done on a trusted network and with appropriate firewall rules.
 

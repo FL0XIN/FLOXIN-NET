@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# FLOXIN NET — portable installer (Termux, Linux, macOS, WSL, Docker, proot)
+# FLOXIN NET — portable installer (Android, Linux, macOS, WSL, Docker, proot)
 set -u
 ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/.floxin_env.sh
@@ -75,17 +75,17 @@ export FLOXIN_BIND_ADDRESS="${FLOXIN_BIND_ADDRESS:-127.0.0.1}"
 EOF
 ok "runtime settings ($HOME/.floxin_environment)"
 
-# Preserve the original Termux convenience, but never modify shell startup files elsewhere.
-if floxin_is_termux && [ -f "$HOME/.bashrc" ] && ! grep -q 'FLOXIN Auto-start' "$HOME/.bashrc" 2>/dev/null; then
+# Preserve Android auto-start convenience, but never modify shell startup files elsewhere.
+if floxin_is_android_env && [ -f "$HOME/.bashrc" ] && ! grep -q 'FLOXIN Auto-start' "$HOME/.bashrc" 2>/dev/null; then
     cat >> "$HOME/.bashrc" <<'EOF'
 
-# FLOXIN Auto-start (Termux only)
+# FLOXIN Auto-start (Android only)
 [ -f "$HOME/.floxin_environment" ] && . "$HOME/.floxin_environment"
 if [ -f "$HOME/dnsmasq/floxin_dns.py" ] && ! pgrep -f '[f]loxin_dns.py' >/dev/null 2>&1; then
     (cd "$HOME/dnsmasq" && nohup python3 floxin_dns.py > dns.log 2>&1 &)
 fi
 EOF
-    ok "Termux auto-start added"
+    ok "Android auto-start added"
 else
     info "Auto-start not added; use FLOXIN bg or DNSF start"
 fi
