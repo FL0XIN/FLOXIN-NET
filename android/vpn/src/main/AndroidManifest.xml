@@ -4,6 +4,8 @@
     <application
         android:allowBackup="false"
         android:label="FLOXIN VPN"
+        android:icon="@drawable/vpn_logo"
+        android:roundIcon="@drawable/vpn_logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.FloxinVpn">
         <activity

@@ -39,6 +39,7 @@ import com.fl0xin.floxinnet.ui.providers.ProvidersScreen
 import com.fl0xin.floxinnet.ui.scenarios.ScenariosScreen
 import com.fl0xin.floxinnet.ui.settings.SettingsScreen
 import com.fl0xin.floxinnet.ui.stats.StatsScreen
+import com.fl0xin.floxinnet.ui.StartupGate
 import com.fl0xin.floxinnet.ui.theme.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -48,7 +49,7 @@ import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    override fun onCreate(state: Bundle?) { installSplashScreen(); super.onCreate(state); setContent { FloxinTheme { FloxinRoot() } }; lifecycleScope.launch(Dispatchers.IO) { val saved = LanguageStore.current(this@MainActivity); withContext(Dispatchers.Main) { LanguageStore.apply(saved) } } }
+    override fun onCreate(state: Bundle?) { installSplashScreen(); super.onCreate(state); setContent { FloxinTheme { StartupGate { FloxinRoot() } } }; lifecycleScope.launch(Dispatchers.IO) { val saved = LanguageStore.current(this@MainActivity); withContext(Dispatchers.Main) { LanguageStore.apply(saved) } } }
 }
 
 @Composable

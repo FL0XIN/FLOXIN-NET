@@ -14,4 +14,9 @@ class FloxinVpnService : VpnService() {
         stopSelfResult(startId)
         return START_NOT_STICKY
     }
+
+    companion object {
+        const val ACTION_START = "com.fl0xin.floxinvpn.vpn.START"
+        const val ACTION_STOP = "com.fl0xin.floxinvpn.vpn.STOP"
+    }
 }
