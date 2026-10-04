@@ -48,7 +48,7 @@ class VpnGateCatalog(
                     openVpnProfileBase64 = field(row, "OpenVPN_ConfigData_Base64")
                 ).takeIf { it.usable }
             }.getOrNull()
-        }
+        }.toList()
     }
 
     fun decodeProfile(server: VpnServer): String =
