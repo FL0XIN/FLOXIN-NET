@@ -19,7 +19,7 @@ HOME_BIN="${HOME}/bin"; DNS_DIR="${HOME}/dnsmasq"
 mkdir -p "$HOME_BIN" "$DNS_DIR" "$HOME/.floxin/tools" || { bad "cannot create install directories"; exit 1; }
 
 echo -e "${CC}=========================================${CZ}"
-echo -e "${CC}  FLOXIN NET — Installer v1.1${CZ}"
+echo -e "${CC}  FLOXIN NET — Installer v1.2${CZ}"
 echo -e "${CC}=========================================${CZ}"
 info "Environment: $OS | package manager: $PM"
 info "Architecture: $(uname -m 2>/dev/null || echo unknown) | kernel: $(uname -r 2>/dev/null || echo unknown)"

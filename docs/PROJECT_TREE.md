@@ -8,6 +8,7 @@ FLOXIN-NET/
 │   ├── NETSCAN          # Network quality analysis
 │   ├── NETOPT           # Measurement-based optimization advice
 │   ├── NETTURBO         # Alternate CDN port measurements
+│   ├── NETVPN           # Live public VPN relay discovery
 │   ├── DNSMGR           # DNS lifecycle manager
 │   ├── DNSPICK          # DNS provider selection
 │   ├── NETMON           # DNS activity monitor
@@ -18,10 +19,12 @@ FLOXIN-NET/
 ├── tools/               # Python measurement engines
 │   ├── netscan.py
 │   ├── netopt.py
-│   └── netturbo.py
+│   ├── netturbo.py
+│   └── vpngate.py
 ├── dns/                 # Local DNS resolver
 ├── api/                 # Optional localhost REST API
-├── android/             # Android client
+├── android/             # Android DNS client and independent VPN app
+│   └── vpn/              # Separate international VPN application
 ├── docs/                # Architecture, API, and feature documentation
 ├── tests/               # Shell and API tests
 ├── install.sh           # Installer

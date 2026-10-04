@@ -12,6 +12,7 @@ This inventory was verified against the current `main` tree, `bin/FLOXIN` dispat
 | `bin/NETSCAN` | Measurement-only network quality, latency, jitter, packet-loss, and behavior checks | User entry point; `FLOXIN netscan` |
 | `bin/NETOPT` | Measurement-based MTU, route, DNS, protocol, and TCP recommendations | User entry point; `FLOXIN netopt` |
 | `bin/NETTURBO` | Alternate HTTPS port measurements, SQLite history, selection, and monitoring | User entry point; `FLOXIN netturbo` |
+| `bin/NETVPN` | Live public VPN Gate relay discovery and ranking | User entry point; `FLOXIN netvpn` |
 | `bin/DNSMGR` | DNS resolver lifecycle and DNS/VPN mode commands | User, `FLOXIN`, `NETMON`, tests |
 | `bin/QUICKCHECK` | Fast connection, resolver, blocklist, and speed check | `FLOXIN test` fallback |
 | `bin/DNSPICK` | DNS provider latency testing and provider selection | `FLOXIN` menu, `PRESAFE` |

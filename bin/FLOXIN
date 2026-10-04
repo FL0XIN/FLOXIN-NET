@@ -1002,6 +1002,13 @@ cmd_help() {
     echo -e "  ${CG}netturbo report${CZ}      Show aggregate comparison"
     echo -e "  ${CY}CDN: speed.cloudflare.com/__down (fixed comparison source)${CZ}"
     echo ""
+    echo -e "${CC}═══════ FLOXIN VPN ═══════${CZ}"
+    echo -e "  ${CG}netvpn refresh${CZ}       Refresh public VPN Gate relay catalog"
+    echo -e "  ${CG}netvpn list${CZ}          Rank live public relays"
+    echo -e "  ${CG}netvpn best${CZ}          Show the best current relay"
+    echo -e "  ${CG}netvpn countries${CZ}     List available relay countries"
+    echo -e "  ${CY}Public relays are volunteer-operated and not private${CZ}"
+    echo ""
 
     # Mode-specific quick tips
     case "$MODE" in
@@ -1254,6 +1261,7 @@ shell() {
             netscan)      bash "$HOME/bin/NETSCAN" $arg ;;
             netopt)       bash "$HOME/bin/NETOPT" $arg ;;
             netturbo)     bash "$HOME/bin/NETTURBO" $arg ;;
+            netvpn)       bash "$HOME/bin/NETVPN" $arg ;;
             short|sh)     cmd_short ;;
             [0-9])        cmd_apply_alias "$cmd" ;;
             F|S|W|M|H|V|A|Z|B|C|R|X|T|L)
@@ -1330,5 +1338,5 @@ case "${1:-shell}" in
     doctor|fix)       cmd_doctor ;;
     env|info)         cmd_env ;;
     help|-h)          cmd_help ;;
-    *)                echo "Usage: FLOXIN [shell|start|restart|rescue|status|stop|export|netscan|netopt|netturbo|help]" ;;
+    *)                echo "Usage: FLOXIN [shell|start|restart|rescue|status|stop|export|netscan|netopt|netturbo|netvpn|help]" ;;
 esac

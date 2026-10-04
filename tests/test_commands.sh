@@ -6,12 +6,12 @@ for f in "$ROOT"/bin/* "$ROOT"/install.sh "$ROOT"/setup.sh "$ROOT"/uninstall.sh 
 done
 printf '%s\n' 'command syntax: ok'
 
-expected_bin=(FLOXIN FLOXIN-API NETGUARD NETSCAN NETOPT NETTURBO DNSMGR QUICKCHECK DNSPICK NETPROBE PRESAFE NETTHROTTLE NETCHECK NETMON NETSTAT NETKILL)
+expected_bin=(FLOXIN FLOXIN-API NETGUARD NETSCAN NETOPT NETTURBO NETVPN DNSMGR QUICKCHECK DNSPICK NETPROBE PRESAFE NETTHROTTLE NETCHECK NETMON NETSTAT NETKILL)
 expected_lib=(.floxin_net.sh .floxin_codes.sh .floxin_scenarios.sh .floxin_simple.sh .floxin_short.sh .floxin_sleepblock.sh .floxin_netscan.sh .floxin_netopt.sh .floxin_netturbo.sh)
 for name in "${expected_bin[@]}"; do test -x "$ROOT/bin/$name"; done
 for name in "${expected_lib[@]}"; do test -f "$ROOT/lib/$name"; done
 for name in FLOXIN_API DNSF DNSWITCH WEHACK SAFE_MODE THROTTLE_SIM TESTALL SOUSG NETSTATE PANIC CHECK; do test -L "$ROOT/bin/$name"; done
 for name in FLOXIN_NET NETCTL MASTER B dv EMERGENCY; do test ! -e "$ROOT/bin/$name"; done
 test ! -e "$ROOT/android/local.properties"
-python3 -m py_compile "$ROOT/tools/netscan.py" "$ROOT/tools/netopt.py" "$ROOT/tools/netturbo.py"
+python3 -m py_compile "$ROOT/tools/netscan.py" "$ROOT/tools/netopt.py" "$ROOT/tools/netturbo.py" "$ROOT/tools/vpngate.py"
 printf '%s\n' 'script inventory: ok'

@@ -1,6 +1,14 @@
 MIT License
 
-Copyright (c) 2026 WORM
+Copyright (c) 2026 FLOXIN NET contributors
+
+## Scope
+
+This MIT License applies to the original FLOXIN NET source code and documentation in this repository, including the local DNS resolver, `NETGUARD` protection features, network analysis tools, CLI scripts, and original Android application code, unless a file or directory contains a more specific license notice.
+
+Third-party blocklists, provider data, fonts, images, libraries, Android dependencies, and other externally sourced assets are not relicensed by this file. They remain subject to their own copyright notices, attribution requirements, and license terms. Consult the relevant notices before redistributing those materials.
+
+The FLOXIN NET name, logos, and trademarks are not granted for use under this software license. This does not limit the rights expressly granted for the copyrighted Software below.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -48,6 +48,7 @@ Phase 1 analysis tools are `NETSCAN` (`network`, `quality`, `latency`, `jitter`,
 | `NETSCAN` | `network`, `quality`, `latency`, `jitter`, `packet-loss`, `dpi-probe`, `qos-detect` |
 | `NETOPT` | `auto`, `mtu-probe`, `mtu-set`, `tcp-tuning`, `port-test`, `route-test`, `dns-optimize`, `protocol`, `status`, `reset` |
 | `NETTURBO` | `scan`, `best`, `apply`, `monitor`, `auto`, `status`, `stop`, `history`, `report` |
+| `NETVPN` | `refresh`, `list`, `best`, `countries` — live public VPN Gate relay discovery |
 
 All new tools are measurement-first, no-root utilities. They do not promise extra bandwidth, bypass provider policies, or silently modify system networking.
 
@@ -61,9 +62,15 @@ The previous command names remain available as symlinks for compatibility, inclu
 
 The organized repository tree is documented in [docs/PROJECT_TREE.md](docs/PROJECT_TREE.md).
 
+## FLOXIN VPN companion app
+
+The repository also contains an independent international VPN application under `android/vpn`, with package `com.fl0xin.floxinvpn`. It uses the official VPN Gate public-relay catalog, ranks live candidates, and includes a limited-data policy. Public volunteer relays are not guaranteed private, fast, or stable. See [docs/VPN_ARCHITECTURE.md](docs/VPN_ARCHITECTURE.md) and [docs/NETVPN.md](docs/NETVPN.md).
+
 ## Security and privacy notes
 
 The resolver binds to localhost by default. Query logs are stored locally in `~/dnsmasq/queries.log`; they may contain domain names and should be treated as private. Upstream DNS requests go to the configured provider. Review providers and blocklists before use, and do not run downloaded shell code without inspecting it.
+
+`NETGUARD`, the local DNS protection code, and the related security libraries are covered by this repository's [MIT License](LICENSE). Third-party blocklists and dependencies retain their own licenses and attributions. MIT permits reuse and modification but provides the software without warranty.
 
 The uninstall script removes installed program files but preserves user data, including blocklists, logs, configuration, and backups.
 
