@@ -1,7 +1,7 @@
 package com.fl0xin.floxinnet.ui.scenarios
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -14,16 +14,16 @@ import com.fl0xin.floxinnet.ui.components.*
 @Composable
 fun ScenariosScreen(vm: ScenariosViewModel = viewModel()) {
     val scenarios by vm.scenarios.collectAsState()
-    Page(stringResource(R.string.scenarios_title)) {
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(scenarios, key = { it["code"].orEmpty() }) { scenario ->
-                PremiumCard(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(12.dp)) {
-                        Text(scenario["code"].orEmpty(), style = MaterialTheme.typography.titleMedium)
-                        Text("${scenario["type"]} · ${scenario["provider"]} · ${scenario["net"]}")
-                        Text(scenario["desc"].orEmpty())
-                        SecondaryButton(stringResource(R.string.apply)) { }
-                    }
+    val applied by vm.applied.collectAsState()
+    ListPage(stringResource(R.string.scenarios_title)) {
+        item { applied?.let { Text("Applied: $it", color = MaterialTheme.colorScheme.primary) } }
+        items(scenarios, key = { it["code"].orEmpty() }) { scenario ->
+            PremiumCard(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(scenario["code"].orEmpty(), style = MaterialTheme.typography.titleMedium)
+                    Text("${scenario["type"]} · ${scenario["provider"]} · ${scenario["net"]}")
+                    Text(scenario["desc"].orEmpty())
+                    SecondaryButton(stringResource(R.string.apply)) { vm.apply(scenario["code"].orEmpty()) }
                 }
             }
         }

@@ -1,7 +1,7 @@
 package com.fl0xin.floxinnet.ui.codes
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -15,17 +15,19 @@ import com.fl0xin.floxinnet.ui.components.*
 fun CodesScreen(vm: CodesViewModel = viewModel()) {
     val codes by vm.codes.collectAsState()
     val query by vm.query.collectAsState()
-    Page(stringResource(R.string.codes_title)) {
-        OutlinedTextField(query, vm::search, label = { Text(stringResource(R.string.search_codes)) }, modifier = Modifier.fillMaxWidth())
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(codes, key = { it["code"].orEmpty() }) { code ->
-                PremiumCard(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(12.dp)) {
-                        Text(code["code"].orEmpty(), style = MaterialTheme.typography.titleMedium)
-                        Text("${code["mode"]} · ${code["provider"]} · ${code["net"]}")
-                        Text(code["desc"].orEmpty())
-                        SecondaryButton(stringResource(R.string.apply)) { }
-                    }
+    val applied by vm.applied.collectAsState()
+    ListPage(stringResource(R.string.codes_title)) {
+        item {
+            OutlinedTextField(query, vm::search, label = { Text(stringResource(R.string.search_codes)) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            applied?.let { Text("Applied: $it", color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(top = 8.dp)) }
+        }
+        items(codes, key = { it["code"].orEmpty() }) { code ->
+            PremiumCard(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(code["code"].orEmpty(), style = MaterialTheme.typography.titleMedium)
+                    Text("${code["mode"]} · ${code["provider"]} · ${code["net"]}")
+                    Text(code["desc"].orEmpty())
+                    SecondaryButton(stringResource(R.string.apply)) { vm.apply(code["code"].orEmpty()) }
                 }
             }
         }

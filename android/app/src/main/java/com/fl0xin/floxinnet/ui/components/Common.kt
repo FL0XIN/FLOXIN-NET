@@ -3,21 +3,25 @@ package com.fl0xin.floxinnet.ui.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -38,6 +42,16 @@ fun Page(title: String, content: @Composable ColumnScope.() -> Unit) {
     }
 }
 
+/** Never nest LazyColumn inside Page's vertical scroll container. */
+@Composable
+fun ListPage(title: String, content: LazyListScope.() -> Unit) {
+    Column(Modifier.fillMaxSize().background(DarkBg).padding(horizontal = 20.dp, vertical = 24.dp)) {
+        FloxinText(title, TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, color = TextPrimary))
+        Spacer(Modifier.height(16.dp))
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), content = content)
+    }
+}
+
 @Composable
 fun PremiumCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     Box(modifier.clip(CardShape).background(Brush.linearGradient(listOf(Surface, Color(0xFF141B2D)))).border(BorderStroke(1.dp, Border), CardShape).padding(20.dp)) { Column(verticalArrangement = Arrangement.spacedBy(10.dp), content = content) }
@@ -45,26 +59,29 @@ fun PremiumCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.
 
 @Composable
 fun PrimaryButton(text: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    val haptic = LocalHapticFeedback.current
-    Box(modifier.heightIn(min = 48.dp).clip(ButtonShape).background(Brush.linearGradient(listOf(CyberBlue, Purple))).clickable { haptic.performHapticFeedback(HapticFeedbackType.LongPress); onClick() }.padding(horizontal = 18.dp, vertical = 14.dp), contentAlignment = Alignment.Center) { FloxinText(text, TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DarkBg)) }
+    Button(onClick = onClick, modifier = modifier.heightIn(min = 48.dp), shape = ButtonShape, colors = ButtonDefaults.buttonColors(containerColor = CyberBlue, contentColor = DarkBg), contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp)) {
+        FloxinText(text, TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DarkBg))
+    }
 }
 
 @Composable
 fun SecondaryButton(text: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Box(modifier.heightIn(min = 48.dp).clip(ButtonShape).border(1.dp, CyberBlue, ButtonShape).clickable { onClick() }.padding(horizontal = 18.dp, vertical = 14.dp), contentAlignment = Alignment.Center) { FloxinText(text, TextStyle(fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = CyberBlue)) }
+    OutlinedButton(onClick = onClick, modifier = modifier.heightIn(min = 48.dp), shape = ButtonShape, border = BorderStroke(1.dp, CyberBlue), contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp)) {
+        FloxinText(text, TextStyle(fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = CyberBlue))
+    }
 }
 
 @Composable
-fun CompactAction(text: String, onClick: () -> Unit) { Box(Modifier.clip(RoundedCornerShape(10.dp)).clickable(onClick = onClick).padding(horizontal = 8.dp, vertical = 6.dp)) { FloxinText(text, TextStyle(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = CyberBlue)) } }
+fun CompactAction(text: String, onClick: () -> Unit) { OutlinedButton(onClick = onClick, shape = RoundedCornerShape(10.dp), contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)) { FloxinText(text, TextStyle(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = CyberBlue)) } }
 
 @Composable
-fun CustomRadio(selected: Boolean, onClick: () -> Unit) { Box(Modifier.size(22.dp).clip(CircleShape).border(1.5.dp, if (selected) CyberBlue else Border, CircleShape).clickable(onClick = onClick).padding(5.dp)) { if (selected) Box(Modifier.fillMaxSize().background(CyberBlue, CircleShape)) } }
+fun CustomRadio(selected: Boolean, onClick: () -> Unit) { RadioButton(selected = selected, onClick = onClick) }
 
 @Composable
 fun CustomProgress(progress: Float) { Box(Modifier.fillMaxWidth().height(8.dp).clip(CircleShape).background(Surface2)) { Box(Modifier.fillMaxWidth(progress.coerceIn(0f, 1f)).fillMaxHeight().background(Brush.horizontalGradient(listOf(CyberBlue, Purple)), CircleShape)) } }
 
 @Composable
-fun CustomSwitch(checked: Boolean, onClick: () -> Unit) { Box(Modifier.size(width = 48.dp, height = 28.dp).clip(CircleShape).background(if (checked) CyberBlue else Surface2).border(1.dp, if (checked) CyberBlue else Border, CircleShape).clickable(onClick = onClick).padding(4.dp), contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart) { Box(Modifier.size(20.dp).background(if (checked) DarkBg else TextMuted, CircleShape)) } }
+fun CustomSwitch(checked: Boolean, onClick: () -> Unit) { Switch(checked = checked, onCheckedChange = { onClick() }) }
 
 @Composable
 fun StatusIndicator(running: Boolean) { Box(Modifier.size(10.dp).background(if (running) Success else TextMuted, CircleShape)) }
